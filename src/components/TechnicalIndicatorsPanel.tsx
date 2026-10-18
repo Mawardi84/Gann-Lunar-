@@ -41,8 +41,12 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
               <h3 className="text-lg font-bold text-white tracking-wide">
                 Indikator Teknikal & 4 Dimensi Pasar
               </h3>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono animate-pulse">
-                ● Live Real-Time
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono animate-pulse ${
+                metrics.isCollectingData 
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' 
+                  : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              }`}>
+                {metrics.isCollectingData ? `● Mengumpulkan Data (${metrics.dataPointsCount}/50)` : '● Live Real-Time'}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -136,34 +140,44 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                 metrics.rsi.status === 'Overbought' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
                 metrics.rsi.status === 'Oversold' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                metrics.rsi.status === 'Mengumpulkan data...' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse' :
                 'bg-slate-800 text-slate-300'
               }`}>
                 {metrics.rsi.status}
               </span>
             </div>
 
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-black font-mono text-white">{metrics.rsi.value}</span>
-              <span className={`text-xs font-semibold flex items-center gap-1 ${metrics.rsi.signal === 'Bullish' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {metrics.rsi.signal === 'Bullish' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                {metrics.rsi.signal}
-              </span>
-            </div>
+            {metrics.rsi.isCollecting || metrics.rsi.value === null ? (
+              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-center space-y-1">
+                <span className="text-xs font-semibold text-amber-400 block animate-pulse">Mengumpulkan data...</span>
+                <span className="text-[10px] text-slate-400 block">Menunggu akumulasi minimal 15 titik data time-series</span>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-2xl font-black font-mono text-white">{metrics.rsi.value}</span>
+                  <span className={`text-xs font-semibold flex items-center gap-1 ${metrics.rsi.signal === 'Bullish' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {metrics.rsi.signal === 'Bullish' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                    {metrics.rsi.signal}
+                  </span>
+                </div>
 
-            {/* RSI visual scale */}
-            <div className="space-y-1">
-              <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden relative">
-                <div 
-                  className="h-full bg-sky-400 rounded-full transition-all duration-300"
-                  style={{ width: `${metrics.rsi.value}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-                <span>30 (Oversold)</span>
-                <span>50</span>
-                <span>70 (Overbought)</span>
-              </div>
-            </div>
+                {/* RSI visual scale */}
+                <div className="space-y-1">
+                  <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden relative">
+                    <div 
+                      className="h-full bg-sky-400 rounded-full transition-all duration-300"
+                      style={{ width: `${metrics.rsi.value}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                    <span>30 (Oversold)</span>
+                    <span>50</span>
+                    <span>70 (Overbought)</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -176,6 +190,7 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
                 <span>MACD (12, 26, 9)</span>
               </span>
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                metrics.macd.signal === 'Mengumpulkan data...' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse' :
                 metrics.macd.signal.includes('Bullish') ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
               }`}>
@@ -183,25 +198,34 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
               </span>
             </div>
 
-            <div className="flex items-baseline justify-between">
-              <div>
-                <span className="text-[10px] text-slate-400 block font-mono">Histogram:</span>
-                <span className={`text-xl font-black font-mono ${metrics.macd.histogram >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {metrics.macd.histogram >= 0 ? `+${metrics.macd.histogram}` : metrics.macd.histogram}
-                </span>
+            {metrics.macd.isCollecting || metrics.macd.macdLine === null ? (
+              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-center space-y-1">
+                <span className="text-xs font-semibold text-amber-400 block animate-pulse">Mengumpulkan data...</span>
+                <span className="text-[10px] text-slate-400 block">Menunggu akumulasi minimal 35 titik data time-series</span>
               </div>
-              <div className="text-right text-[10px] font-mono text-slate-400">
-                <div>MACD: <span className="text-white font-bold">{metrics.macd.macdLine}</span></div>
-                <div>Signal: <span className="text-slate-300">{metrics.macd.signalLine}</span></div>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex items-baseline justify-between">
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-mono">Histogram:</span>
+                    <span className={`text-xl font-black font-mono ${(metrics.macd.histogram ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {(metrics.macd.histogram ?? 0) >= 0 ? `+${metrics.macd.histogram}` : metrics.macd.histogram}
+                    </span>
+                  </div>
+                  <div className="text-right text-[10px] font-mono text-slate-400">
+                    <div>MACD: <span className="text-white font-bold">{metrics.macd.macdLine}</span></div>
+                    <div>Signal: <span className="text-slate-300">{metrics.macd.signalLine}</span></div>
+                  </div>
+                </div>
 
-            <div className="p-2 rounded-lg bg-slate-900 border border-slate-800/80 text-[11px] text-slate-300 flex items-center justify-between">
-              <span>Momentum Tren:</span>
-              <strong className={metrics.macd.histogram >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
-                {metrics.macd.histogram >= 0 ? 'Akumulasi Bullish' : 'Distribusi Bearish'}
-              </strong>
-            </div>
+                <div className="p-2 rounded-lg bg-slate-900 border border-slate-800/80 text-[11px] text-slate-300 flex items-center justify-between">
+                  <span>Momentum Tren:</span>
+                  <strong className={(metrics.macd.histogram ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
+                    {(metrics.macd.histogram ?? 0) >= 0 ? 'Akumulasi Bullish' : 'Distribusi Bearish'}
+                  </strong>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -214,6 +238,7 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
                 <span>Bollinger Bands (20, 2)</span>
               </span>
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                metrics.bollinger.status === 'Mengumpulkan data...' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse' :
                 metrics.bollinger.status === 'Squeeze' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse' :
                 metrics.bollinger.status === 'Expansion' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
                 'bg-slate-800 text-slate-300'
@@ -222,25 +247,33 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-1 text-[10px] font-mono text-center">
-              <div className="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span className="text-slate-400 block text-[9px]">Upper</span>
-                <span className="text-rose-400 font-bold">{metrics.bollinger.upper}</span>
+            {metrics.bollinger.isCollecting || metrics.bollinger.upper === null ? (
+              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-center space-y-1">
+                <span className="text-xs font-semibold text-amber-400 block animate-pulse">Mengumpulkan data...</span>
+                <span className="text-[10px] text-slate-400 block">Menunggu akumulasi minimal 20 titik data time-series</span>
               </div>
-              <div className="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span className="text-slate-400 block text-[9px]">Middle (SMA)</span>
-                <span className="text-amber-400 font-bold">{metrics.bollinger.middle}</span>
-              </div>
-              <div className="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span className="text-slate-400 block text-[9px]">Lower</span>
-                <span className="text-emerald-400 font-bold">{metrics.bollinger.lower}</span>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-1 text-[10px] font-mono text-center">
+                  <div className="bg-slate-900 p-1.5 rounded border border-slate-800">
+                    <span className="text-slate-400 block text-[9px]">Upper</span>
+                    <span className="text-rose-400 font-bold">{metrics.bollinger.upper}</span>
+                  </div>
+                  <div className="bg-slate-900 p-1.5 rounded border border-slate-800">
+                    <span className="text-slate-400 block text-[9px]">Middle (SMA)</span>
+                    <span className="text-amber-400 font-bold">{metrics.bollinger.middle}</span>
+                  </div>
+                  <div className="bg-slate-900 p-1.5 rounded border border-slate-800">
+                    <span className="text-emerald-400 font-bold">{metrics.bollinger.lower}</span>
+                  </div>
+                </div>
 
-            <div className="flex justify-between text-[11px] text-slate-400">
-              <span>Bandwidth: <strong className="text-white font-mono">{metrics.bollinger.bandwidth}%</strong></span>
-              <span>%B: <strong className="text-purple-400 font-mono">{metrics.bollinger.percentB}%</strong></span>
-            </div>
+                <div className="flex justify-between text-[11px] text-slate-400">
+                  <span>Bandwidth: <strong className="text-white font-mono">{metrics.bollinger.bandwidth}%</strong></span>
+                  <span>%B: <strong className="text-purple-400 font-mono">{metrics.bollinger.percentB}%</strong></span>
+                </div>
+              </>
+            )}
           </div>
         )}
 

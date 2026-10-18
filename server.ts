@@ -40,9 +40,10 @@ Tolong berikan 2 paragraf interpretasi teknikal dalam bahasa Indonesia yang eleg
     });
 
     res.json({ analysis: response.text || 'Analisis Gann tidak tersedia.' });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Gagal menghasilkan analisis AI.';
     console.error('Gemini Gann API Error:', error);
-    res.status(500).json({ error: error.message || 'Gagal menghasilkan analisis AI.' });
+    res.status(500).json({ error: message });
   }
 });
 
@@ -98,11 +99,20 @@ FORMAT KELUARAN YANG WAJIB DIGUNAKAN:
     });
 
     res.json({ oracleReport: response.text || '' });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Gagal menghasilkan analisis Gann-Lunar Architect.';
     console.error('Gann-Lunar Architect API Error:', error);
-    res.status(500).json({ error: error.message || 'Gagal menghasilkan analisis Gann-Lunar Architect.' });
+    res.status(500).json({ error: message });
   }
 });
+
+interface MarketPriceItem {
+  price: number;
+  high: number;
+  low: number;
+  change: number;
+  source: 'live' | 'fallback';
+}
 
 app.get('/api/market/live-prices', async (req, res) => {
   try {
@@ -144,36 +154,48 @@ app.get('/api/market/live-prices', async (req, res) => {
               }
             }
           }
-        } catch (e) {
-          console.error(`Error querying TradingView scanner ${scanner}:`, e);
+        } catch (e: unknown) {
+          const errMsg = e instanceof Error ? e.message : String(e);
+          console.error(`Error querying TradingView scanner ${scanner}:`, errMsg);
         }
       })
     );
 
-    const prices: Record<string, { price: number; high: number; low: number; change: number }> = {
-      'XAU/USD': tvResults['OANDA:XAUUSD'] || { price: 4164.86, high: 4199.08, low: 4147.16, change: -0.14 },
-      'BTC/USD': tvResults['BINANCE:BTCUSDT'] || { price: 81320.00, high: 82940.80, low: 80809.25, change: -1.13 },
-      'EUR/USD': tvResults['FX:EURUSD'] || { price: 1.1228, high: 1.1269, low: 1.1208, change: +0.07 },
-      'S&P 500': tvResults['SP:SPX'] || { price: 7657.01, high: 7756.84, low: 7651.91, change: -1.12 },
-      'ETH/USD': tvResults['BINANCE:ETHUSDT'] || { price: 2415.72, high: 2494.00, low: 2393.48, change: -1.09 },
-      'OIL/USD': tvResults['NYMEX:CL1!'] || { price: 98.57, high: 99.00, low: 95.29, change: +0.61 },
-      'GBP/USD': tvResults['FX:GBPUSD'] || { price: 1.3315, high: 1.3372, low: 1.3262, change: +0.29 },
-      'SOL/USD': tvResults['BINANCE:SOLUSDT'] || { price: 103.81, high: 107.44, low: 102.80, change: -1.55 },
+    const assetMap: Record<string, { ticker: string; fallback: { price: number; high: number; low: number; change: number } }> = {
+      'XAU/USD': { ticker: 'OANDA:XAUUSD', fallback: { price: 4164.86, high: 4199.08, low: 4147.16, change: -0.14 } },
+      'BTC/USD': { ticker: 'BINANCE:BTCUSDT', fallback: { price: 81320.00, high: 82940.80, low: 80809.25, change: -1.13 } },
+      'EUR/USD': { ticker: 'FX:EURUSD', fallback: { price: 1.1228, high: 1.1269, low: 1.1208, change: +0.07 } },
+      'S&P 500': { ticker: 'SP:SPX', fallback: { price: 7657.01, high: 7756.84, low: 7651.91, change: -1.12 } },
+      'ETH/USD': { ticker: 'BINANCE:ETHUSDT', fallback: { price: 2415.72, high: 2494.00, low: 2393.48, change: -1.09 } },
+      'OIL/USD': { ticker: 'NYMEX:CL1!', fallback: { price: 98.57, high: 99.00, low: 95.29, change: +0.61 } },
+      'GBP/USD': { ticker: 'FX:GBPUSD', fallback: { price: 1.3315, high: 1.3372, low: 1.3262, change: +0.29 } },
+      'SOL/USD': { ticker: 'BINANCE:SOLUSDT', fallback: { price: 103.81, high: 107.44, low: 102.80, change: -1.55 } },
     };
 
+    const prices: Record<string, MarketPriceItem> = {};
+    for (const [name, meta] of Object.entries(assetMap)) {
+      const live = tvResults[meta.ticker];
+      if (live) {
+        prices[name] = { ...live, source: 'live' };
+      } else {
+        prices[name] = { ...meta.fallback, source: 'fallback' };
+      }
+    }
+
     res.json({ prices });
-  } catch (err: any) {
-    console.error('Error in /api/market/live-prices:', err);
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error('Error in /api/market/live-prices:', errMsg);
     res.json({
       prices: {
-        'XAU/USD': { price: 4164.86, high: 4199.08, low: 4147.16, change: -0.14 },
-        'BTC/USD': { price: 81320.00, high: 82940.80, low: 80809.25, change: -1.13 },
-        'EUR/USD': { price: 1.1228, high: 1.1269, low: 1.1208, change: +0.07 },
-        'S&P 500': { price: 7657.01, high: 7756.84, low: 7651.91, change: -1.12 },
-        'ETH/USD': { price: 2415.72, high: 2494.00, low: 2393.48, change: -1.09 },
-        'OIL/USD': { price: 98.57, high: 99.00, low: 95.29, change: +0.61 },
-        'GBP/USD': { price: 1.3315, high: 1.3372, low: 1.3262, change: +0.29 },
-        'SOL/USD': { price: 103.81, high: 107.44, low: 102.80, change: -1.55 },
+        'XAU/USD': { price: 4164.86, high: 4199.08, low: 4147.16, change: -0.14, source: 'fallback' },
+        'BTC/USD': { price: 81320.00, high: 82940.80, low: 80809.25, change: -1.13, source: 'fallback' },
+        'EUR/USD': { price: 1.1228, high: 1.1269, low: 1.1208, change: +0.07, source: 'fallback' },
+        'S&P 500': { price: 7657.01, high: 7756.84, low: 7651.91, change: -1.12, source: 'fallback' },
+        'ETH/USD': { price: 2415.72, high: 2494.00, low: 2393.48, change: -1.09, source: 'fallback' },
+        'OIL/USD': { price: 98.57, high: 99.00, low: 95.29, change: +0.61, source: 'fallback' },
+        'GBP/USD': { price: 1.3315, high: 1.3372, low: 1.3262, change: +0.29, source: 'fallback' },
+        'SOL/USD': { price: 103.81, high: 107.44, low: 102.80, change: -1.55, source: 'fallback' },
       },
     });
   }

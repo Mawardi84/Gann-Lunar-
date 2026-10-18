@@ -1,35 +1,41 @@
 /**
  * Technical Indicators Calculation Engine
- * Includes RSI, MACD, Bollinger Bands, Moving Averages, Gann Angle Vibration,
- * Fibonacci Confluence, Lunar Volatility Clock, Pythagoras Vector, and Homma Candlestick.
+ * Includes Wilder's RSI, MACD (12,26,9), Bollinger Bands (20,2), Real EMA20/EMA50,
+ * Gann Square of 9 Vibration, Fibonacci Confluence, Lunar Volatility Clock,
+ * Pythagoras Vector, and Homma Candlestick.
  */
 
 export interface IndicatorMetrics {
+  isCollectingData: boolean;
+  dataPointsCount: number;
   // Momentum
   rsi: {
-    value: number;
-    status: 'Oversold' | 'Neutral' | 'Overbought';
-    signal: 'Bullish' | 'Neutral' | 'Bearish';
+    value: number | null;
+    status: 'Oversold' | 'Neutral' | 'Overbought' | 'Mengumpulkan data...';
+    signal: 'Bullish' | 'Neutral' | 'Bearish' | 'Mengumpulkan data...';
+    isCollecting: boolean;
   };
   // Moving Averages & Trend
-  ema20: number;
-  ema50: number;
-  trend: 'Uptrend' | 'Downtrend' | 'Sideways';
+  ema20: number | null;
+  ema50: number | null;
+  trend: 'Uptrend' | 'Downtrend' | 'Sideways' | 'Mengumpulkan data...';
   // Bollinger Bands
   bollinger: {
-    upper: number;
-    middle: number;
-    lower: number;
-    bandwidth: number;
-    percentB: number;
-    status: 'Squeeze' | 'Normal' | 'Expansion';
+    upper: number | null;
+    middle: number | null;
+    lower: number | null;
+    bandwidth: number | null;
+    percentB: number | null;
+    status: 'Squeeze' | 'Normal' | 'Expansion' | 'Mengumpulkan data...';
+    isCollecting: boolean;
   };
   // MACD
   macd: {
-    macdLine: number;
-    signalLine: number;
-    histogram: number;
-    signal: 'Bullish Crossover' | 'Bullish Momentum' | 'Bearish Crossover' | 'Bearish Momentum';
+    macdLine: number | null;
+    signalLine: number | null;
+    histogram: number | null;
+    signal: 'Bullish Crossover' | 'Bullish Momentum' | 'Bearish Crossover' | 'Bearish Momentum' | 'Mengumpulkan data...';
+    isCollecting: boolean;
   };
   // Gann Square of 9 Vibration
   gannVibration: {
@@ -71,7 +77,192 @@ export interface IndicatorMetrics {
 }
 
 /**
- * Calculates synthetic and mathematical technical indicators given price action parameters.
+ * Calculates exponential moving average series from a number array.
+ */
+export function calculateEMASeries(prices: number[], period: number): number[] {
+  if (prices.length < period) return [];
+  const k = 2 / (period + 1);
+  const emaSeries: number[] = [];
+  
+  // Initial SMA for first 'period' elements
+  let sum = 0;
+  for (let i = 0; i < period; i++) {
+    sum += prices[i];
+  }
+  let currentEma = sum / period;
+  emaSeries.push(currentEma);
+
+  for (let i = period; i < prices.length; i++) {
+    currentEma = (prices[i] - currentEma) * k + currentEma;
+    emaSeries.push(currentEma);
+  }
+  return emaSeries;
+}
+
+/**
+ * Calculates Wilder's Smoothing RSI (14 period)
+ */
+export function calculateWildersRSI(prices: number[], period = 14): {
+  value: number;
+  status: 'Oversold' | 'Neutral' | 'Overbought';
+  signal: 'Bullish' | 'Neutral' | 'Bearish';
+} | null {
+  if (prices.length < period + 1) return null;
+
+  let gainSum = 0;
+  let lossSum = 0;
+
+  for (let i = 1; i <= period; i++) {
+    const diff = prices[i] - prices[i - 1];
+    if (diff > 0) {
+      gainSum += diff;
+    } else {
+      lossSum += Math.abs(diff);
+    }
+  }
+
+  let avgGain = gainSum / period;
+  let avgLoss = lossSum / period;
+
+  for (let i = period + 1; i < prices.length; i++) {
+    const diff = prices[i] - prices[i - 1];
+    const gain = diff > 0 ? diff : 0;
+    const loss = diff < 0 ? Math.abs(diff) : 0;
+    avgGain = (avgGain * (period - 1) + gain) / period;
+    avgLoss = (avgLoss * (period - 1) + loss) / period;
+  }
+
+  let rsiValue: number;
+  if (avgLoss === 0) {
+    rsiValue = 100;
+  } else {
+    const rs = avgGain / avgLoss;
+    rsiValue = 100 - (100 / (1 + rs));
+  }
+  rsiValue = parseFloat(rsiValue.toFixed(1));
+
+  let status: 'Oversold' | 'Neutral' | 'Overbought' = 'Neutral';
+  let signal: 'Bullish' | 'Neutral' | 'Bearish' = 'Neutral';
+
+  if (rsiValue >= 70) {
+    status = 'Overbought';
+    signal = 'Bearish';
+  } else if (rsiValue <= 30) {
+    status = 'Oversold';
+    signal = 'Bullish';
+  } else if (rsiValue > 50) {
+    status = 'Neutral';
+    signal = 'Bullish';
+  } else {
+    status = 'Neutral';
+    signal = 'Bearish';
+  }
+
+  return { value: rsiValue, status, signal };
+}
+
+/**
+ * Calculates Bollinger Bands (period 20, 2 stdDev)
+ */
+export function calculateBollingerBands(prices: number[], period = 20, multiplier = 2): {
+  upper: number;
+  middle: number;
+  lower: number;
+  bandwidth: number;
+  percentB: number;
+  status: 'Squeeze' | 'Normal' | 'Expansion';
+} | null {
+  if (prices.length < period) return null;
+
+  const slice = prices.slice(-period);
+  const sum = slice.reduce((a, b) => a + b, 0);
+  const middle = sum / period;
+
+  const variance = slice.reduce((acc, val) => acc + Math.pow(val - middle, 2), 0) / period;
+  const stdDev = Math.sqrt(variance);
+
+  const upper = middle + multiplier * stdDev;
+  const lower = middle - multiplier * stdDev;
+  const currentPrice = prices[prices.length - 1];
+
+  const bandwidth = middle > 0 ? ((upper - lower) / middle) * 100 : 0;
+  const percentB = upper !== lower ? ((currentPrice - lower) / (upper - lower)) * 100 : 50;
+  const status: 'Squeeze' | 'Normal' | 'Expansion' = bandwidth < 2 ? 'Squeeze' : bandwidth > 8 ? 'Expansion' : 'Normal';
+
+  return {
+    upper: parseFloat(upper.toFixed(2)),
+    middle: parseFloat(middle.toFixed(2)),
+    lower: parseFloat(lower.toFixed(2)),
+    bandwidth: parseFloat(bandwidth.toFixed(2)),
+    percentB: parseFloat(percentB.toFixed(1)),
+    status,
+  };
+}
+
+/**
+ * Calculates MACD (12, 26, 9)
+ */
+export function calculateMACD(prices: number[], fast = 12, slow = 26, signalPeriod = 9): {
+  macdLine: number;
+  signalLine: number;
+  histogram: number;
+  signal: 'Bullish Crossover' | 'Bullish Momentum' | 'Bearish Crossover' | 'Bearish Momentum';
+} | null {
+  if (prices.length < slow + signalPeriod) return null;
+
+  // We need EMA12 and EMA26 aligned
+  // Fast multiplier and slow multiplier
+  const kFast = 2 / (fast + 1);
+  const kSlow = 2 / (slow + 1);
+
+  // Initial SMA for slow
+  let slowSum = 0;
+  for (let i = 0; i < slow; i++) {
+    slowSum += prices[i];
+  }
+  let slowEma = slowSum / slow;
+
+  // Fast SMA for same starting point
+  let fastSum = 0;
+  for (let i = slow - fast; i < slow; i++) {
+    fastSum += prices[i];
+  }
+  let fastEma = fastSum / fast;
+
+  const macdSeries: number[] = [fastEma - slowEma];
+
+  for (let i = slow; i < prices.length; i++) {
+    fastEma = (prices[i] - fastEma) * kFast + fastEma;
+    slowEma = (prices[i] - slowEma) * kSlow + slowEma;
+    macdSeries.push(fastEma - slowEma);
+  }
+
+  if (macdSeries.length < signalPeriod) return null;
+
+  const signalSeries = calculateEMASeries(macdSeries, signalPeriod);
+  if (signalSeries.length === 0) return null;
+
+  const currentMacd = parseFloat(macdSeries[macdSeries.length - 1].toFixed(2));
+  const currentSignal = parseFloat(signalSeries[signalSeries.length - 1].toFixed(2));
+  const histogram = parseFloat((currentMacd - currentSignal).toFixed(2));
+
+  let signal: 'Bullish Crossover' | 'Bullish Momentum' | 'Bearish Crossover' | 'Bearish Momentum' = 'Bullish Momentum';
+  if (histogram >= 0 && currentMacd >= currentSignal) {
+    signal = histogram > Math.abs(currentMacd) * 0.25 ? 'Bullish Crossover' : 'Bullish Momentum';
+  } else {
+    signal = histogram < -Math.abs(currentMacd) * 0.25 ? 'Bearish Crossover' : 'Bearish Momentum';
+  }
+
+  return {
+    macdLine: currentMacd,
+    signalLine: currentSignal,
+    histogram,
+    signal,
+  };
+}
+
+/**
+ * Calculates technical indicators given price action parameters and real price history.
  */
 export function calculateTechnicalIndicators(
   currentPrice: number,
@@ -79,65 +270,47 @@ export function calculateTechnicalIndicators(
   swingLow: number,
   trendAngle = 45,
   candlePattern = 'Hammer / Pin Bar',
-  moonDate?: Date
+  moonDate?: Date,
+  priceHistory?: number[]
 ): IndicatorMetrics {
   const price = Math.max(0.0001, currentPrice);
   const high = Math.max(price, swingHigh);
   const low = Math.min(price, swingLow);
   const range = Math.max(0.0001, high - low);
 
-  // 1. RSI Approximation based on price position within Swing Range and momentum
-  const posInRange = ((price - low) / range) * 100;
-  let rsiValue = Math.min(95, Math.max(10, posInRange));
-  // Smooth towards realistic RSI
-  rsiValue = parseFloat((rsiValue * 0.7 + 50 * 0.3).toFixed(1));
+  const history = priceHistory || [];
+  const count = history.length;
+  const hasHistory = count >= 20;
 
-  let rsiStatus: 'Oversold' | 'Neutral' | 'Overbought' = 'Neutral';
-  let rsiSignal: 'Bullish' | 'Neutral' | 'Bearish' = 'Neutral';
+  // 1. RSI
+  const rsiCalc = count >= 15 ? calculateWildersRSI(history, 14) : null;
+  const rsiValue = rsiCalc ? rsiCalc.value : null;
+  const rsiStatus = rsiCalc ? rsiCalc.status : 'Mengumpulkan data...';
+  const rsiSignal = rsiCalc ? rsiCalc.signal : 'Mengumpulkan data...';
 
-  if (rsiValue >= 70) {
-    rsiStatus = 'Overbought';
-    rsiSignal = 'Bearish';
-  } else if (rsiValue <= 30) {
-    rsiStatus = 'Oversold';
-    rsiSignal = 'Bullish';
-  } else if (rsiValue > 50) {
-    rsiSignal = 'Bullish';
-  } else {
-    rsiSignal = 'Bearish';
+  // 2. EMA20 & EMA50
+  const ema20Series = count >= 20 ? calculateEMASeries(history, 20) : [];
+  const ema50Series = count >= 50 ? calculateEMASeries(history, 50) : [];
+  const ema20 = ema20Series.length > 0 ? parseFloat(ema20Series[ema20Series.length - 1].toFixed(2)) : null;
+  const ema50 = ema50Series.length > 0 ? parseFloat(ema50Series[ema50Series.length - 1].toFixed(2)) : null;
+
+  let trend: 'Uptrend' | 'Downtrend' | 'Sideways' | 'Mengumpulkan data...' = 'Mengumpulkan data...';
+  if (ema20 !== null && ema50 !== null) {
+    trend = price > ema20 && ema20 > ema50 ? 'Uptrend' : price < ema20 && ema20 < ema50 ? 'Downtrend' : 'Sideways';
+  } else if (ema20 !== null) {
+    trend = price > ema20 ? 'Uptrend' : 'Downtrend';
   }
 
-  // 2. Moving Averages & Trend
-  const ema20 = parseFloat((price * 0.985).toFixed(2));
-  const ema50 = parseFloat((price * 0.97).toFixed(2));
-  const trend: 'Uptrend' | 'Downtrend' | 'Sideways' = 
-    price > ema20 && ema20 > ema50 ? 'Uptrend' : price < ema20 && ema20 < ema50 ? 'Downtrend' : 'Sideways';
+  // 3. Bollinger Bands
+  const bbCalc = count >= 20 ? calculateBollingerBands(history, 20, 2) : null;
+  const bbStatus = bbCalc ? bbCalc.status : 'Mengumpulkan data...';
 
-  // 3. Bollinger Bands (20, 2)
-  const middle = parseFloat(((high + low + price) / 3).toFixed(2));
-  const stdDev = parseFloat((range * 0.38).toFixed(2));
-  const upper = parseFloat((middle + 2 * stdDev).toFixed(2));
-  const lower = parseFloat((middle - 2 * stdDev).toFixed(2));
-  const bandwidth = parseFloat((((upper - lower) / middle) * 100).toFixed(2));
-  const percentB = upper !== lower ? parseFloat((((price - lower) / (upper - lower)) * 100).toFixed(1)) : 50;
-  const bbStatus: 'Squeeze' | 'Normal' | 'Expansion' = bandwidth < 3 ? 'Squeeze' : bandwidth > 12 ? 'Expansion' : 'Normal';
+  // 4. MACD
+  const macdCalc = count >= 35 ? calculateMACD(history, 12, 26, 9) : null;
+  const macdSignal = macdCalc ? macdCalc.signal : 'Mengumpulkan data...';
 
-  // 4. MACD Estimation
-  const fastEma = price * 0.992;
-  const slowEma = price * 0.982;
-  const macdLine = parseFloat((fastEma - slowEma).toFixed(2));
-  const signalLine = parseFloat((macdLine * 0.75).toFixed(2));
-  const histogram = parseFloat((macdLine - signalLine).toFixed(2));
-  let macdSignal: 'Bullish Crossover' | 'Bullish Momentum' | 'Bearish Crossover' | 'Bearish Momentum' = 'Bullish Momentum';
-  if (histogram > 0 && macdLine > signalLine) {
-    macdSignal = histogram > macdLine * 0.2 ? 'Bullish Crossover' : 'Bullish Momentum';
-  } else {
-    macdSignal = histogram < -macdLine * 0.2 ? 'Bearish Crossover' : 'Bearish Momentum';
-  }
-
-  // 5. Gann Square of 9 Vibration Angle
+  // 5. Gann Square of 9 Vibration Angle (rule-based from price)
   const root = Math.sqrt(price);
-  // An entire 360 circle on Gann wheel corresponds to root increment of 2
   const circleProgress = (root % 2) / 2; // 0 to 1
   const currentAngleDegrees = Math.round(circleProgress * 360);
   
@@ -183,7 +356,6 @@ export function calculateTechnicalIndicators(
 
   // 7. Lunar Volatility Clock
   const date = moonDate || new Date();
-  // Known reference new moon: January 11, 2024
   const refNewMoon = new Date('2024-01-11T11:57:00Z').getTime();
   const synodicMonthMs = 29.53058867 * 24 * 60 * 60 * 1000;
   const elapsedMs = date.getTime() - refNewMoon;
@@ -191,7 +363,6 @@ export function calculateTechnicalIndicators(
   const moonAgeDays = cycles * 29.53058867;
   const illuminationPct = Math.round((1 - Math.cos(cycles * 2 * Math.PI)) / 2 * 100);
 
-  // High volatility window: H-2 to H+2 from New Moon (days 0-2 or 27.5-29.5) or Full Moon (days 12.7-16.7)
   const isNearNewMoon = moonAgeDays <= 2.2 || moonAgeDays >= 27.3;
   const isNearFullMoon = Math.abs(moonAgeDays - 14.76) <= 2.2;
   const isHighVolatilityWindow = isNearNewMoon || isNearFullMoon;
@@ -258,8 +429,12 @@ export function calculateTechnicalIndicators(
   if (patternType === 'Bullish Reversal') score += 15;
   else if (patternType === 'Bearish Reversal') score -= 15;
 
-  if (rsiValue >= 45 && rsiValue <= 65) score += 5;
-  if (macdSignal.includes('Bullish')) score += 6;
+  if (rsiValue !== null) {
+    if (rsiValue >= 45 && rsiValue <= 65) score += 5;
+    else if (rsiValue < 30) score += 8;
+    else if (rsiValue > 70) score -= 8;
+  }
+  if (macdCalc && macdSignal.includes('Bullish')) score += 6;
 
   score = Math.min(98, Math.max(10, score));
 
@@ -270,27 +445,32 @@ export function calculateTechnicalIndicators(
   else if (score <= 42) overallVerdict = 'SELL';
 
   return {
+    isCollectingData: !hasHistory,
+    dataPointsCount: count,
     rsi: {
       value: rsiValue,
       status: rsiStatus,
       signal: rsiSignal,
+      isCollecting: rsiCalc === null,
     },
     ema20,
     ema50,
     trend,
     bollinger: {
-      upper,
-      middle,
-      lower,
-      bandwidth,
-      percentB,
+      upper: bbCalc ? bbCalc.upper : null,
+      middle: bbCalc ? bbCalc.middle : null,
+      lower: bbCalc ? bbCalc.lower : null,
+      bandwidth: bbCalc ? bbCalc.bandwidth : null,
+      percentB: bbCalc ? bbCalc.percentB : null,
       status: bbStatus,
+      isCollecting: bbCalc === null,
     },
     macd: {
-      macdLine,
-      signalLine,
-      histogram,
+      macdLine: macdCalc ? macdCalc.macdLine : null,
+      signalLine: macdCalc ? macdCalc.signalLine : null,
+      histogram: macdCalc ? macdCalc.histogram : null,
       signal: macdSignal,
+      isCollecting: macdCalc === null,
     },
     gannVibration: {
       root: parseFloat(root.toFixed(3)),
