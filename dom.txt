@@ -1,0 +1,36 @@
+### Page
+- Page URL: http://localhost:3000/dashboard
+- Page Title: Gann-Lunar Architect Dashboard
+### Snapshot
+```yaml
+- generic [ref=f3e3]:
+  - main [ref=f3e4]:
+    - generic [ref=f3e5]:
+      - generic [ref=f3e6]:
+        - generic [ref=f3e7]
+        - generic [ref=f3e11]
+      - generic [ref=f3e57]:
+        - generic [ref=f3e58]
+        - generic [ref=f3e62]
+        - generic [ref=f3e120]
+      - generic [ref=f3e148]:
+        - generic [ref=f3e149]
+        - generic [ref=f3e153]
+      - generic [ref=f3e179]:
+        - heading "Siap Memvalidasi Setup Trading Anda?" [level=2] [ref=f3e180]
+        - paragraph [ref=f3e181]: Akses kalkulator 4D, streaming chart candlestick real-time, dan asisten keputusan eksekutif sekarang.
+        - generic [ref=f3e182]
+  - contentinfo [ref=f3e192]:
+    - generic [ref=f3e193]:
+      - generic [ref=f3e194]:
+        - generic [ref=f3e201]: Gann-Lunar Architect
+        - generic [ref=f3e202]: ·
+        - generic [ref=f3e203]: Algorithmic 4D Confluence Execution System
+      - generic [ref=f3e204]:
+        - button "Beranda" [ref=f3e205] [cursor=pointer]
+        - button "4D Architect" [ref=f3e206] [cursor=pointer]
+        - button "Market Space" [ref=f3e207] [cursor=pointer]
+        - button "Indikator" [ref=f3e208] [cursor=pointer]
+        - button "Kalkulator Gann" [ref=f3e209] [cursor=pointer]
+      - paragraph [ref=f3e210]: © 2026 Gann-Lunar Architect. Presisi 4 Dimensi Pasar.
+```

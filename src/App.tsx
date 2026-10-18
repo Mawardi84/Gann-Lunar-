@@ -118,11 +118,35 @@ export default function App() {
   // Watchlist real-time feed state
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>(INITIAL_WATCHLIST);
 
-type TabType = 'landing' | 'oracle' | 'dashboard' | 'indicators' | 'calculator' | 'signal' | 'chart' | 'backtest';
+interface JournalEntry {
+  id: string;
+  timestamp: string;
+  asset: string;
+  oracleReport: string;
+  price: number;
+}
+
+type TabType = 'landing' | 'oracle' | 'dashboard' | 'indicators' | 'calculator' | 'signal' | 'chart' | 'backtest' | 'journal';
+
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(() => {
+    const saved = localStorage.getItem('gann_journal');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const saveToJournal = (entry: Omit<JournalEntry, 'id' | 'timestamp'>) => {
+    const newEntry: JournalEntry = {
+      ...entry,
+      id: crypto.randomUUID(),
+      timestamp: new Date().toLocaleString(),
+    };
+    const updated = [newEntry, ...journalEntries];
+    setJournalEntries(updated);
+    localStorage.setItem('gann_journal', JSON.stringify(updated));
+  };
 
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('landing');
+  const [activeTab, setActiveTab] = useState<'landing' | 'oracle' | 'dashboard' | 'indicators' | 'calculator' | 'signal' | 'chart' | 'backtest' | 'journal'>('landing');
 
   // News Ticker States
   const [isNewsTickerVisible, setIsNewsTickerVisible] = useState<boolean>(true);
@@ -480,7 +504,7 @@ type TabType = 'landing' | 'oracle' | 'dashboard' | 'indicators' | 'calculator' 
 
 **KEPUTUSAN GANN-LUNAR ARCHITECT:**
 ${oracleResult.decision === 'EXECUTE' 
-  ? `🟢 EXECUTE: (Semua dimensi sinkron. Rekomendasi BUY di zona ${confluenceZoneText} dengan Stop Loss di ${oracleResult.stopLoss.toFixed(2)} dan Take Profit di ${oracleResult.takeProfit.toFixed(2)} [R:R 1:2.8])`
+  ? `🟢 EXECUTE: (Semua dimensi sinkron. Rekomendasi BUY di zona ${confluenceZoneText} dengan Stop Loss di ${oracleResult.stopLoss.toFixed(2)}, TP 1 di ${oracleResult.takeProfit1.toFixed(2)} [R1], TP 2 di ${oracleResult.takeProfit2.toFixed(2)} [R2], TP 3 di ${oracleResult.takeProfit3.toFixed(2)} [R3])`
   : oracleResult.decision === 'STANDBY'
   ? `🟡 STANDBY: (Zona Konfluensi ${confluenceZoneText} tersentuh, menunggu konfirmasi pola candlestick Homma)`
   : `🔴 IGNORE: (Harga & Waktu tidak sinkron, abaikan dan hindari posisi)`}`;
@@ -523,7 +547,7 @@ ${oracleResult.decision === 'EXECUTE'
             <button 
               onClick={() => setActiveTab('landing')}
               className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'landing'
+                (activeTab as string) === 'landing'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
               }`}
@@ -592,6 +616,19 @@ ${oracleResult.decision === 'EXECUTE'
               }`}
             >
               <span>Kalkulator Gann</span>
+              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('journal')}
+              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'journal'
+                  ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform" />
+              <span>Journal</span>
               <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
@@ -737,6 +774,12 @@ ${oracleResult.decision === 'EXECUTE'
           >
             Kalkulator
           </button>
+          <button 
+            onClick={() => setActiveTab('journal')}
+            className={`py-1.5 px-3 font-semibold rounded-lg transition-colors whitespace-nowrap ${activeTab === 'journal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+          >
+            Journal
+          </button>
         </div>
 
         {/* LANDING PAGE WITH MARKET THEME HERO */}
@@ -764,6 +807,36 @@ ${oracleResult.decision === 'EXECUTE'
               calculateGann(false, item.price, item.factor, item.high, item.low);
             }}
           />
+        )}
+
+        {/* JOURNAL TAB */}
+        {activeTab === 'journal' && (
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">Market Journal</h2>
+              <button 
+                onClick={() => saveToJournal({ 
+                  asset: assetName, 
+                  oracleReport: oracleAiReport || structuredReportText, 
+                  price: livePrice 
+                })}
+                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-lg text-sm hover:bg-amber-400"
+              >
+                Save Current Snapshot
+              </button>
+            </div>
+            <div className="grid gap-4">
+              {journalEntries.map(entry => (
+                <div key={entry.id} className="bg-slate-900 border border-slate-700 p-4 rounded-xl space-y-2">
+                  <div className="flex justify-between text-xs text-slate-400 font-mono">
+                    <span>{entry.timestamp}</span>
+                    <span>{entry.asset} @ {entry.price}</span>
+                  </div>
+                  <p className="text-sm text-slate-200 whitespace-pre-wrap">{entry.oracleReport}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* 4D GANN-LUNAR ARCHITECT SYSTEM */}
@@ -1310,11 +1383,24 @@ ${oracleResult.decision === 'EXECUTE'
                               <span className="text-[10px] text-slate-400 font-normal">(Di bawah level Gann Support S1)</span>
                             </div>
                           </div>
-                          <div>
-                            <span className="text-slate-400">Target Take Profit (TP):</span>
-                            <div className="text-emerald-300 font-bold text-sm">
-                              {oracleResult.takeProfit.toFixed(2)}{' '}
-                              <span className="text-[10px] text-slate-400 font-normal">(Target Resisten Gann R1)</span>
+                          <div className="sm:col-span-2 mt-2 pt-2 border-t border-slate-800">
+                            <span className="text-slate-400 font-medium">Target Take Profit Bertingkat (TP 1, TP 2, TP 3):</span>
+                            <div className="grid grid-cols-3 gap-2.5 mt-2">
+                              <div className="bg-slate-900/90 border border-emerald-500/40 p-2.5 rounded-xl text-center">
+                                <span className="text-[10px] text-emerald-400 font-bold block uppercase tracking-wider">TP 1 (Gann R1)</span>
+                                <span className="text-emerald-300 font-bold text-sm font-mono">{oracleResult.takeProfit1.toFixed(2)}</span>
+                                <span className="text-[9px] text-slate-400 block mt-0.5">Conservative</span>
+                              </div>
+                              <div className="bg-slate-900/90 border border-teal-500/40 p-2.5 rounded-xl text-center">
+                                <span className="text-[10px] text-teal-400 font-bold block uppercase tracking-wider">TP 2 (Gann R2)</span>
+                                <span className="text-teal-300 font-bold text-sm font-mono">{oracleResult.takeProfit2.toFixed(2)}</span>
+                                <span className="text-[9px] text-slate-400 block mt-0.5">Harmonic 90°</span>
+                              </div>
+                              <div className="bg-slate-900/90 border border-cyan-500/40 p-2.5 rounded-xl text-center">
+                                <span className="text-[10px] text-cyan-400 font-bold block uppercase tracking-wider">TP 3 (Gann R3)</span>
+                                <span className="text-cyan-300 font-bold text-sm font-mono">{oracleResult.takeProfit3.toFixed(2)}</span>
+                                <span className="text-[9px] text-slate-400 block mt-0.5">Extended 180°</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1840,6 +1926,43 @@ ${oracleResult.decision === 'EXECUTE'
                   <p className="text-xs text-slate-400 leading-relaxed">
                     Level distribusi / take profit optimal di sekitar Resisten R1 Gann. Batas invalidasi di level {(result.res1 * 1.003).toFixed(2)}.
                   </p>
+                </div>
+              </div>
+
+              {/* Multi-Target Take Profit (TP 1, TP 2, TP 3) */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 mt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <Target className="w-4 h-4 text-amber-400" />
+                    <span>Target Take Profit Bertingkat (Multi-Target Gann)</span>
+                  </div>
+                  <span className="text-[11px] text-slate-400 font-mono">Berdasarkan Putaran Derajat Gann Square of 9</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="bg-slate-950/80 border border-emerald-500/30 p-3.5 rounded-xl">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-emerald-400 font-bold">TP 1 (Gann R1)</span>
+                      <span className="text-[10px] text-slate-500 font-mono">45° Shift</span>
+                    </div>
+                    <div className="text-lg font-bold font-mono text-emerald-300 mt-1">{result.res1}</div>
+                    <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">Amankan 40% volume posisi di target konservatif pertama.</p>
+                  </div>
+                  <div className="bg-slate-950/80 border border-teal-500/30 p-3.5 rounded-xl">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-teal-400 font-bold">TP 2 (Gann R2)</span>
+                      <span className="text-[10px] text-slate-500 font-mono">90° Square</span>
+                    </div>
+                    <div className="text-lg font-bold font-mono text-teal-300 mt-1">{result.res2}</div>
+                    <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">Amankan 40% volume & geser SL ke titik impas (Breakeven).</p>
+                  </div>
+                  <div className="bg-slate-950/80 border border-cyan-500/30 p-3.5 rounded-xl">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-cyan-400 font-bold">TP 3 (Gann R3)</span>
+                      <span className="text-[10px] text-slate-500 font-mono">135° Extended</span>
+                    </div>
+                    <div className="text-lg font-bold font-mono text-cyan-300 mt-1">{result.res3}</div>
+                    <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">Trailing stop untuk 20% sisa posisi sampai momentum jenuh.</p>
+                  </div>
                 </div>
               </div>
             </div>

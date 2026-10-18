@@ -57,6 +57,9 @@ test('4D Market Oracle Decision Engine', () => {
   assert.equal(resultExecute.isCandleConfirmed, true);
   assert.ok(resultExecute.stopLoss < 4164);
   assert.ok(resultExecute.takeProfit > 4164);
+  assert.ok(resultExecute.takeProfit1 > 4164);
+  assert.ok(resultExecute.takeProfit2 > resultExecute.takeProfit1);
+  assert.ok(resultExecute.takeProfit3 > resultExecute.takeProfit2);
 
   // Scenario 2: Lunar invalid -> IGNORE
   const resultIgnore = evaluate4DOracle(

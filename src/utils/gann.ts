@@ -37,6 +37,9 @@ export interface OracleDecisionResult {
   isCandleConfirmed: boolean;
   stopLoss: number;
   takeProfit: number;
+  takeProfit1: number;
+  takeProfit2: number;
+  takeProfit3: number;
 }
 
 export function calculateGannLevels(pivot: number, factor = 0.125): GannLevels {
@@ -127,6 +130,9 @@ export function evaluate4DOracle(
 
   const stopLoss = gann.sup1 * 0.997;
   const takeProfit = gann.res1;
+  const takeProfit1 = gann.res1;
+  const takeProfit2 = gann.res2;
+  const takeProfit3 = gann.res3;
 
   return {
     decision,
@@ -139,5 +145,8 @@ export function evaluate4DOracle(
     isCandleConfirmed,
     stopLoss,
     takeProfit,
+    takeProfit1,
+    takeProfit2,
+    takeProfit3,
   };
 }
