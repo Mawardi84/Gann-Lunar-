@@ -1,0 +1,6 @@
+{
+  "name": "GannMaster Pro: Square of 9 Technical Analyzer",
+  "description": "Advanced W.D. Gann Square of 9 technical analysis calculator and AI market scenario generator.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
