@@ -84,8 +84,8 @@ export const BacktestTab: React.FC<BacktestTabProps> = ({ state }) => {
 
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
               <div className="text-xs text-slate-400">Best Trade</div>
-              <div className="text-2xl font-black font-mono text-emerald-300 mt-1">
-                +{backtestStats.bestTrade} pts
+              <div className={`text-2xl font-black font-mono mt-1 ${backtestStats.bestTrade >= 0 ? 'text-emerald-300' : 'text-rose-400'}`}>
+                {backtestStats.bestTrade >= 0 ? `+${backtestStats.bestTrade}` : backtestStats.bestTrade} pts
               </div>
               <div className="text-[10px] text-slate-500 mt-0.5">Keuntungan Terbesar</div>
             </div>
