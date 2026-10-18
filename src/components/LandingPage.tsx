@@ -4,8 +4,8 @@ import {
   Moon, Compass, Eye, TrendingUp, TrendingDown, Layers, Zap,
   CheckCircle2, AlertTriangle, XCircle, ChevronRight, BarChart2
 } from 'lucide-react';
-import heroMarketBg from '../assets/images/hero_market_matrix_1792181547588.jpg';
-import matrixConfluenceImg from '../assets/images/matrix_4d_confluence_1792181565058.jpg';
+import heroMarketBg from '../assets/images/hero_market_matrix.webp';
+import matrixConfluenceImg from '../assets/images/matrix_4d_confluence.webp';
 
 interface WatchlistItem {
   symbol: string;

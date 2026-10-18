@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { 
   Orbit, Sparkles, ArrowRight, BookOpen, Calculator, BarChart3, 
   Layers, Target, Gauge, Newspaper, CandlestickChart, History, 
@@ -12,14 +12,15 @@ import {
 
 import { useMarketState } from './hooks/useMarketState';
 import { LandingPage } from './components/LandingPage';
-import { OracleTab } from './components/tabs/OracleTab';
-import { DashboardTab } from './components/tabs/DashboardTab';
-import { IndicatorsTab } from './components/tabs/IndicatorsTab';
-import { CalculatorTab } from './components/tabs/CalculatorTab';
-import { SignalTab } from './components/tabs/SignalTab';
-import { ChartTab } from './components/tabs/ChartTab';
-import { BacktestTab } from './components/tabs/BacktestTab';
-import { JournalTab } from './components/tabs/JournalTab';
+
+const OracleTab = lazy(() => import('./components/tabs/OracleTab').then(m => ({ default: m.OracleTab })));
+const DashboardTab = lazy(() => import('./components/tabs/DashboardTab').then(m => ({ default: m.DashboardTab })));
+const IndicatorsTab = lazy(() => import('./components/tabs/IndicatorsTab').then(m => ({ default: m.IndicatorsTab })));
+const CalculatorTab = lazy(() => import('./components/tabs/CalculatorTab').then(m => ({ default: m.CalculatorTab })));
+const SignalTab = lazy(() => import('./components/tabs/SignalTab').then(m => ({ default: m.SignalTab })));
+const ChartTab = lazy(() => import('./components/tabs/ChartTab').then(m => ({ default: m.ChartTab })));
+const BacktestTab = lazy(() => import('./components/tabs/BacktestTab').then(m => ({ default: m.BacktestTab })));
+const JournalTab = lazy(() => import('./components/tabs/JournalTab').then(m => ({ default: m.JournalTab })));
 
 export default function App() {
   const state = useMarketState();
@@ -301,52 +302,58 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab Views */}
-        {activeTab === 'landing' && (
-          <LandingPage 
-            onLaunchMatrix={() => setActiveTab('oracle')}
-            onOpenMarketSpace={() => setActiveTab('dashboard')}
-            onOpenCalculator={() => setActiveTab('calculator')}
-            livePrice={state.livePrice}
-            liveHigh={state.liveHigh}
-            liveLow={state.liveLow}
-            assetName={state.assetName}
-            watchlist={state.watchlist}
-            onSelectAsset={state.handleSelectWatchlistAsset}
-          />
-        )}
+        {/* Tab Views with Suspense */}
+        <Suspense fallback={
+          <div className="flex items-center justify-center py-24 text-slate-400 font-mono text-sm animate-pulse">
+            Memuat modul matriks 4D...
+          </div>
+        }>
+          {activeTab === 'landing' && (
+            <LandingPage 
+              onLaunchMatrix={() => setActiveTab('oracle')}
+              onOpenMarketSpace={() => setActiveTab('dashboard')}
+              onOpenCalculator={() => setActiveTab('calculator')}
+              livePrice={state.livePrice}
+              liveHigh={state.liveHigh}
+              liveLow={state.liveLow}
+              assetName={state.assetName}
+              watchlist={state.watchlist}
+              onSelectAsset={state.handleSelectWatchlistAsset}
+            />
+          )}
 
-        {activeTab === 'oracle' && (
-          <OracleTab state={state} />
-        )}
+          {activeTab === 'oracle' && (
+            <OracleTab state={state} />
+          )}
 
-        {activeTab === 'dashboard' && (
-          <DashboardTab state={state} />
-        )}
+          {activeTab === 'dashboard' && (
+            <DashboardTab state={state} />
+          )}
 
-        {activeTab === 'indicators' && (
-          <IndicatorsTab state={state} />
-        )}
+          {activeTab === 'indicators' && (
+            <IndicatorsTab state={state} />
+          )}
 
-        {activeTab === 'signal' && (
-          <SignalTab state={state} />
-        )}
+          {activeTab === 'signal' && (
+            <SignalTab state={state} />
+          )}
 
-        {activeTab === 'chart' && (
-          <ChartTab state={state} />
-        )}
+          {activeTab === 'chart' && (
+            <ChartTab state={state} />
+          )}
 
-        {activeTab === 'calculator' && (
-          <CalculatorTab state={state} />
-        )}
+          {activeTab === 'calculator' && (
+            <CalculatorTab state={state} />
+          )}
 
-        {activeTab === 'journal' && (
-          <JournalTab state={state} />
-        )}
+          {activeTab === 'journal' && (
+            <JournalTab state={state} />
+          )}
 
-        {activeTab === 'backtest' && (
-          <BacktestTab state={state} />
-        )}
+          {activeTab === 'backtest' && (
+            <BacktestTab state={state} />
+          )}
+        </Suspense>
       </main>
 
       {/* Footer */}

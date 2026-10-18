@@ -680,3 +680,5 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
     </div>
   );
 };
+
+export default OracleTab;

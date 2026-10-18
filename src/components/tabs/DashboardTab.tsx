@@ -420,3 +420,5 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
     </div>
   );
 };
+
+export default DashboardTab;
