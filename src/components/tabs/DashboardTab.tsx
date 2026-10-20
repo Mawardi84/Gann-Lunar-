@@ -44,6 +44,11 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
     loading,
     technicalMetrics,
     priceVal,
+    chartInterval,
+    chartStyle,
+    chartTheme,
+    chartTimezone,
+    showSideToolbar,
   } = state;
 
   if (!result) return null;
@@ -176,8 +181,8 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
           <div className="h-[420px] w-full bg-slate-950 rounded-xl border border-slate-800 overflow-hidden relative">
             {chartSource === 'tradingview' ? (
               <iframe
-                key={`dashboard-${tvSymbol}-${selectedStudies.join('-')}`}
-                src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=${encodeURIComponent(tvSymbol)}&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=0f172a&theme=dark&style=1&timezone=Etc%2FUTC&locale=id${studiesParam}`}
+                key={`dashboard-${tvSymbol}-${chartInterval}-${chartStyle}-${chartTheme}-${showSideToolbar}-${chartTimezone}-${selectedStudies.join('-')}`}
+                src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=${encodeURIComponent(tvSymbol)}&interval=${chartInterval}&hidesidetoolbar=${showSideToolbar ? '0' : '1'}&symboledit=1&saveimage=1&toolbarbg=${chartTheme === 'dark' ? '0f172a' : 'f8fafc'}&theme=${chartTheme}&style=${chartStyle}&timezone=${encodeURIComponent(chartTimezone)}&locale=id${studiesParam}`}
                 width="100%"
                 height="100%"
                 style={{ border: 'none' }}

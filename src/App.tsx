@@ -7,7 +7,7 @@ import React, { lazy, Suspense } from 'react';
 import { 
   Orbit, Sparkles, ArrowRight, BookOpen, Calculator, BarChart3, 
   Layers, Target, Gauge, Newspaper, CandlestickChart, History, 
-  FastForward, Rewind, Pin, PinOff, Eye, EyeOff 
+  FastForward, Rewind, Pin, PinOff, Eye, EyeOff, Building2 
 } from 'lucide-react';
 
 import { useMarketState } from './hooks/useMarketState';
@@ -21,6 +21,7 @@ const SignalTab = lazy(() => import('./components/tabs/SignalTab').then(m => ({ 
 const ChartTab = lazy(() => import('./components/tabs/ChartTab').then(m => ({ default: m.ChartTab })));
 const BacktestTab = lazy(() => import('./components/tabs/BacktestTab').then(m => ({ default: m.BacktestTab })));
 const JournalTab = lazy(() => import('./components/tabs/JournalTab').then(m => ({ default: m.JournalTab })));
+const FundamentalTab = lazy(() => import('./components/tabs/FundamentalTab').then(m => ({ default: m.FundamentalTab })));
 
 export default function App() {
   const state = useMarketState();
@@ -67,19 +68,19 @@ export default function App() {
           <nav className="hidden lg:flex items-center gap-1.5 bg-slate-900/60 p-1 rounded-2xl border border-slate-800/80 backdrop-blur-md">
             <button 
               onClick={() => setActiveTab('landing')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 (activeTab as string) === 'landing'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
               }`}
             >
               <span>Beranda</span>
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
             <button 
               onClick={() => setActiveTab('oracle')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'oracle'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -87,12 +88,12 @@ export default function App() {
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
               <span>4D Architect</span>
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
             <button 
               onClick={() => setActiveTab('dashboard')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'dashboard'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -100,12 +101,25 @@ export default function App() {
             >
               <BarChart3 className="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform" />
               <span>Market Space</span>
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('fundamental')}
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'fundamental'
+                  ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span>Fundamental</span>
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
             <button 
               onClick={() => setActiveTab('indicators')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'indicators'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -116,25 +130,25 @@ export default function App() {
               {technicalMetrics.isCollectingData && (
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
               )}
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
             <button 
               onClick={() => setActiveTab('signal')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'signal'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
               }`}
             >
               <Target className="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform" />
-              <span>Sinyal & TP</span>
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span>Sinyal</span>
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
             <button 
               onClick={() => setActiveTab('chart')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'chart'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -142,12 +156,12 @@ export default function App() {
             >
               <CandlestickChart className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform" />
               <span>Chart</span>
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
             <button 
               onClick={() => setActiveTab('calculator')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'calculator'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -155,12 +169,12 @@ export default function App() {
             >
               <Calculator className="w-3.5 h-3.5 text-purple-400 group-hover:scale-110 transition-transform" />
               <span>Kalkulator</span>
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
             <button 
               onClick={() => setActiveTab('journal')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'journal'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -173,12 +187,12 @@ export default function App() {
                   {journalEntries.length}
                 </span>
               )}
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
             <button 
               onClick={() => setActiveTab('backtest')}
-              className={`relative group px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'backtest'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -186,7 +200,7 @@ export default function App() {
             >
               <History className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
               <span>Backtest</span>
-              <span className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
           </nav>
 
@@ -293,8 +307,9 @@ export default function App() {
             <button onClick={() => setActiveTab('landing')} className="px-3 py-1.5 rounded-lg text-slate-300 font-medium shrink-0">Beranda</button>
             <button onClick={() => setActiveTab('oracle')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'oracle' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>4D Architect</button>
             <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Market Space</button>
+            <button onClick={() => setActiveTab('fundamental')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'fundamental' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Fundamental</button>
             <button onClick={() => setActiveTab('indicators')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'indicators' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Indikator</button>
-            <button onClick={() => setActiveTab('signal')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'signal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Sinyal & TP</button>
+            <button onClick={() => setActiveTab('signal')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'signal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Sinyal</button>
             <button onClick={() => setActiveTab('chart')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'chart' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Chart</button>
             <button onClick={() => setActiveTab('calculator')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'calculator' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Kalkulator</button>
             <button onClick={() => setActiveTab('journal')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'journal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Journal ({journalEntries.length})</button>
@@ -305,7 +320,7 @@ export default function App() {
         {/* Tab Views with Suspense */}
         <Suspense fallback={
           <div className="flex items-center justify-center py-24 text-slate-400 font-mono text-sm animate-pulse">
-            Memuat modul matriks 4D...
+            Memuat modul fundamental makro...
           </div>
         }>
           {activeTab === 'landing' && (
@@ -328,6 +343,10 @@ export default function App() {
 
           {activeTab === 'dashboard' && (
             <DashboardTab state={state} />
+          )}
+
+          {activeTab === 'fundamental' && (
+            <FundamentalTab state={state} />
           )}
 
           {activeTab === 'indicators' && (
@@ -381,6 +400,7 @@ export default function App() {
             <button onClick={() => setActiveTab('landing')} className="hover:text-amber-300 transition-colors cursor-pointer">Beranda</button>
             <button onClick={() => setActiveTab('oracle')} className="hover:text-amber-300 transition-colors cursor-pointer">4D Architect</button>
             <button onClick={() => setActiveTab('dashboard')} className="hover:text-amber-300 transition-colors cursor-pointer">Market Space</button>
+            <button onClick={() => setActiveTab('fundamental')} className="hover:text-amber-300 transition-colors cursor-pointer">Fundamental</button>
             <button onClick={() => setActiveTab('indicators')} className="hover:text-amber-300 transition-colors cursor-pointer">Indikator</button>
             <button onClick={() => setActiveTab('signal')} className="hover:text-amber-300 transition-colors cursor-pointer">Sinyal</button>
             <button onClick={() => setActiveTab('calculator')} className="hover:text-amber-300 transition-colors cursor-pointer">Kalkulator Gann</button>

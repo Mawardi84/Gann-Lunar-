@@ -201,6 +201,42 @@ app.get('/api/market/live-prices', async (req, res) => {
   }
 });
 
+app.post('/api/fundamental/analyze', async (req, res) => {
+  try {
+    const { eventType, indicatorName, actual, consensus, previous, unit, sourceRef } = req.body;
+    
+    const prompt = `Bertindaklah sebagai Quantitative Fundamental Research Analyst yang berspesialisasi pada instrumen XAU/USD (Gold).
+Analisis data rilis makroekonomi berikut secara objektif, berimbang, dan grounded pada sumber resmi:
+- Jenis Event: ${eventType}
+- Indikator: ${indicatorName}
+- Nilai Aktual: ${actual} ${unit}
+- Nilai Konsensus (Ekspektasi Pra-Rilis): ${consensus} ${unit}
+- Nilai Periode Sebelumnya: ${previous} ${unit}
+- Referensi Sumber Resmi: ${sourceRef || 'Official Release'}
+
+TUGAS ANALISIS:
+1. Hitung besaran kejutan (*economic surprise*) dan arah deviasinya terhadap konsensus.
+2. Jelaskan implikasi fundamental makroekonomi terhadap instrumen XAU/USD (pertimbangkan faktor suku bunga riil, DXY, dan inflasi).
+3. Evaluasi apakah kondisi ini memicu bias \`BULLISH\`, \`BEARISH\`, \`MIXED\`, atau \`NO_CLEAR_BIAS\`.
+4. Berikan rangkuman analisis terstruktur dalam Bahasa Indonesia profesional.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: 'Anda adalah Quantitative Fundamental Research Analyst XAU/USD. Berikan analisis berbasis data yang objektif, grounded, dan profesional dalam Bahasa Indonesia.',
+        temperature: 0.2,
+      },
+    });
+
+    res.json({ analysis: response.text || 'Analisis fundamental tidak tersedia.' });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Gagal menghasilkan analisis fundamental AI.';
+    console.error('Gemini Fundamental API Error:', error);
+    res.status(500).json({ error: message });
+  }
+});
+
 async function startServer() {
   const vite = await createViteServer({
     server: { middlewareMode: true },

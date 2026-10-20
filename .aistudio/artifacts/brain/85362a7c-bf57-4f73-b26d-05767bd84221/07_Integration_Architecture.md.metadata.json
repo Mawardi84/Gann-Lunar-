@@ -1,0 +1,6 @@
+{
+  "summary": "Integration Architecture (P07 / P06) detailing data sources, ingestion/validation, storage versioning, quantitative service, AI interpretation, conceptual API contracts, and integration with existing React SPA without forcing microservices.",
+  "updatedAt": "2026-10-20T03:01:23.106074607Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

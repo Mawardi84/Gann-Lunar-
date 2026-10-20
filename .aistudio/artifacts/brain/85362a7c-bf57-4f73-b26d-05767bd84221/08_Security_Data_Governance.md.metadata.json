@@ -1,0 +1,6 @@
+{
+  "summary": "Security, Data Governance & Risk Management (P07) covering secret/API-key isolation, server-side boundaries, audit trail provenance, prompt injection defenses, vendor dependency management, and financial risk communication.",
+  "updatedAt": "2026-10-20T03:06:54.092777114Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

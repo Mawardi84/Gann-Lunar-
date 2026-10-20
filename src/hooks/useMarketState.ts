@@ -70,17 +70,29 @@ export type TabType =
   | 'signal' 
   | 'chart' 
   | 'backtest' 
-  | 'journal';
+  | 'journal'
+  | 'fundamental';
 
 export const INITIAL_WATCHLIST: WatchlistItem[] = [
   { symbol: 'XAU/USD', name: 'Gold Spot', tvSymbol: 'OANDA:XAUUSD', price: 4164.86, high: 4199.08, low: 4147.16, change: -0.14, isUp: false, factor: 0.125, source: 'fallback' },
+  { symbol: 'XAG/USD', name: 'Silver Spot', tvSymbol: 'OANDA:XAGUSD', price: 32.45, high: 33.10, low: 31.90, change: +0.45, isUp: true, factor: 0.125, source: 'fallback' },
   { symbol: 'BTC/USD', name: 'Bitcoin', tvSymbol: 'BINANCE:BTCUSDT', price: 81320.00, high: 82940.80, low: 80809.25, change: -1.13, isUp: true, factor: 0.125, source: 'fallback' },
-  { symbol: 'EUR/USD', name: 'Euro / US Dollar', tvSymbol: 'FX:EURUSD', price: 1.1228, high: 1.1269, low: 1.1208, change: +0.07, isUp: true, factor: 0.125, source: 'fallback' },
-  { symbol: 'S&P 500', name: 'US 500 Index', tvSymbol: 'SP:SPX', price: 7657.01, high: 7756.84, low: 7651.91, change: -1.12, isUp: false, factor: 0.125, source: 'fallback' },
   { symbol: 'ETH/USD', name: 'Ethereum', tvSymbol: 'BINANCE:ETHUSDT', price: 2415.72, high: 2494.00, low: 2393.48, change: -1.09, isUp: true, factor: 0.125, source: 'fallback' },
-  { symbol: 'OIL/USD', name: 'Crude Oil WTI', tvSymbol: 'NYMEX:CL1!', price: 98.57, high: 99.00, low: 95.29, change: +0.61, isUp: true, factor: 0.125, source: 'fallback' },
+  { symbol: 'SOL/USD', name: 'Solana', tvSymbol: 'BINANCE:SOLUSDT', price: 103.81, high: 107.44, low: 102.80, change: -1.55, isUp: false, factor: 0.125, source: 'fallback' },
+  { symbol: 'BNB/USD', name: 'Binance Coin', tvSymbol: 'BINANCE:BNBUSDT', price: 615.40, high: 628.00, low: 610.10, change: +0.82, isUp: true, factor: 0.125, source: 'fallback' },
+  { symbol: 'XRP/USD', name: 'Ripple', tvSymbol: 'BINANCE:XRPUSDT', price: 2.35, high: 2.44, low: 2.28, change: +2.10, isUp: true, factor: 0.125, source: 'fallback' },
+  { symbol: 'EUR/USD', name: 'Euro / US Dollar', tvSymbol: 'FX:EURUSD', price: 1.1228, high: 1.1269, low: 1.1208, change: +0.07, isUp: true, factor: 0.125, source: 'fallback' },
   { symbol: 'GBP/USD', name: 'British Pound', tvSymbol: 'FX:GBPUSD', price: 1.3315, high: 1.3372, low: 1.3262, change: +0.29, isUp: true, factor: 0.125, source: 'fallback' },
-  { symbol: 'SOL/USD', name: 'Solana', tvSymbol: 'BINANCE:SOLUSDT', price: 103.81, high: 107.44, low: 102.80, change: -1.55, isUp: false, factor: 0.125, source: 'fallback' }
+  { symbol: 'USD/JPY', name: 'US Dollar / Yen', tvSymbol: 'FX:USDJPY', price: 152.40, high: 153.15, low: 151.90, change: -0.18, isUp: false, factor: 0.125, source: 'fallback' },
+  { symbol: 'AUD/USD', name: 'Australian Dollar', tvSymbol: 'FX:AUDUSD', price: 0.6712, high: 0.6745, low: 0.6690, change: +0.15, isUp: true, factor: 0.125, source: 'fallback' },
+  { symbol: 'S&P 500', name: 'US 500 Index', tvSymbol: 'SP:SPX', price: 7657.01, high: 7756.84, low: 7651.91, change: -1.12, isUp: false, factor: 0.125, source: 'fallback' },
+  { symbol: 'NASDAQ', name: 'Nasdaq 100', tvSymbol: 'NASDAQ:NDX', price: 20450.80, high: 20680.00, low: 20390.10, change: -0.75, isUp: false, factor: 0.125, source: 'fallback' },
+  { symbol: 'DOW JONES', name: 'Dow Jones Industrial', tvSymbol: 'DJ:DJI', price: 43210.50, high: 43500.00, low: 43100.00, change: +0.34, isUp: true, factor: 0.125, source: 'fallback' },
+  { symbol: 'OIL/USD', name: 'Crude Oil WTI', tvSymbol: 'NYMEX:CL1!', price: 98.57, high: 99.00, low: 95.29, change: +0.61, isUp: true, factor: 0.125, source: 'fallback' },
+  { symbol: 'GAS/USD', name: 'Natural Gas', tvSymbol: 'NYMEX:NG1!', price: 2.85, high: 2.92, low: 2.78, change: -1.20, isUp: false, factor: 0.125, source: 'fallback' },
+  { symbol: 'AAPL', name: 'Apple Inc', tvSymbol: 'NASDAQ:AAPL', price: 235.60, high: 238.20, low: 234.10, change: +1.15, isUp: true, factor: 0.125, source: 'fallback' },
+  { symbol: 'TSLA', name: 'Tesla Inc', tvSymbol: 'NASDAQ:TSLA', price: 242.80, high: 248.50, low: 239.00, change: -2.30, isUp: false, factor: 0.125, source: 'fallback' },
+  { symbol: 'NVDA', name: 'NVIDIA Corp', tvSymbol: 'NASDAQ:NVDA', price: 138.45, high: 141.20, low: 137.00, change: +2.45, isUp: true, factor: 0.125, source: 'fallback' }
 ];
 
 export function useMarketState() {
@@ -93,6 +105,14 @@ export function useMarketState() {
   const [volatility, setVolatility] = useState<'Low' | 'Medium' | 'High'>('Medium');
   const [showOracleChart, setShowOracleChart] = useState<boolean>(true);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState<boolean>(true);
+
+  // Advanced TradingView Chart Customization States
+  const [chartInterval, setChartInterval] = useState<string>('D');
+  const [chartStyle, setChartStyle] = useState<string>('1'); // 1: Candles, 0: Bars, 3: Line, 9: Area, 8: Heiken Ashi
+  const [chartTheme, setChartTheme] = useState<'dark' | 'light'>('dark');
+  const [chartTimezone, setChartTimezone] = useState<string>('Etc/UTC');
+  const [showSideToolbar, setShowSideToolbar] = useState<boolean>(true);
+  const [isChartFullscreen, setIsChartFullscreen] = useState<boolean>(false);
 
   // 4D Market Oracle States
   const [oracleSwingHigh, setOracleSwingHigh] = useState<string>('4199.08');
@@ -664,6 +684,18 @@ ${oracleResult.decision === 'EXECUTE'
     isHighMatched,
     isLowMatched,
     areAllParametersMatched,
+    chartInterval,
+    setChartInterval,
+    chartStyle,
+    setChartStyle,
+    chartTheme,
+    setChartTheme,
+    chartTimezone,
+    setChartTimezone,
+    showSideToolbar,
+    setShowSideToolbar,
+    isChartFullscreen,
+    setIsChartFullscreen,
   };
 }
 
