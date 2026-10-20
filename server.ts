@@ -214,6 +214,8 @@ Analisis data rilis makroekonomi berikut secara objektif, berimbang, dan grounde
 - Nilai Periode Sebelumnya: ${previous} ${unit}
 - Referensi Sumber Resmi: ${sourceRef || 'Official Release'}
 
+CATATAN: Data ini adalah data historis referensi, bukan rilis real-time terbaru. Jika relevan, sebutkan dalam analisis bahwa kondisi pasar saat ini mungkin sudah bergeser sejak tanggal rilis data ini.
+
 TUGAS ANALISIS:
 1. Hitung besaran kejutan (*economic surprise*) dan arah deviasinya terhadap konsensus.
 2. Jelaskan implikasi fundamental makroekonomi terhadap instrumen XAU/USD (pertimbangkan faktor suku bunga riil, DXY, dan inflasi).

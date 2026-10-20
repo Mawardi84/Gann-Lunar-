@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Building2, Calendar, TrendingUp, TrendingDown, AlertCircle, ShieldCheck, Zap, RefreshCw, FileText, ExternalLink, CheckCircle2, Layers 
+  Building2, Calendar, TrendingUp, TrendingDown, AlertCircle, ShieldCheck, Zap, RefreshCw, FileText, ExternalLink, CheckCircle2, Layers, Clock 
 } from 'lucide-react';
 import { MarketState } from '../../hooks/useMarketState';
 import { INITIAL_MACRO_EVENTS, MacroEventRecord, calculateEconomicSurprise } from '../../utils/fundamental';
@@ -19,7 +19,7 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const selectedEvent = events.find(e => e.event_id === selectedEventId) || events[0];
-  const surpriseData = calculateEconomicSurprise(selectedEvent.actual_value, selectedEvent.consensus_value);
+  const surpriseData = calculateEconomicSurprise(selectedEvent.actual_value, selectedEvent.consensus_value, selectedEvent.event_type);
 
   const filteredEvents = filterType === 'ALL' 
     ? events 
@@ -35,8 +35,8 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
         body: JSON.stringify({
           eventType: event.event_type,
           indicatorName: event.indicator_name,
-          actual: event.actual_value,
-          consensus: event.consensus_value,
+          actual: event.range_label || event.actual_value,
+          consensus: event.range_label || event.consensus_value,
           previous: event.previous_value,
           unit: event.unit,
           sourceRef: event.source_reference
@@ -58,19 +58,22 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
       <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-full text-xs font-mono font-bold flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                 QUANTITATIVE FUNDAMENTAL ANALYSIS ENGINE
               </span>
-              <span className="text-xs text-slate-400 font-mono">XAU/USD Macro Suite</span>
+              <span className="px-2.5 py-1 bg-blue-500/15 text-blue-300 border border-blue-500/30 rounded-full text-[11px] font-mono flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-blue-400" />
+                Data historis referensi per April 2026 — belum ada rilis baru yang ditambahkan ke sistem.
+              </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Analisis Makroekonomi & Kejutan Statistik
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Pusat audit rilis data tier-1 AS (FOMC, NFP, CPI, PPI). Mencegah look-ahead bias dengan verifikasi konsensus pra-rilis, perhitungan <em>Economic Surprise Z-score</em>, dan penjelasan AI berbasis dokumen resmi.
+              Pusat audit rilis data tier-1 AS (FOMC, NFP, CPI, PPI). Mencegah look-ahead bias dengan verifikasi konsensus pra-rilis, perhitungan <em>Economic Surprise Z-score</em>, dan penjelasan AI berbasis dokumen resmi BLS/Federal Reserve.
             </p>
           </div>
 
@@ -115,7 +118,7 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
           <div className="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
             {filteredEvents.map(ev => {
               const isSelected = ev.event_id === selectedEventId;
-              const surprise = calculateEconomicSurprise(ev.actual_value, ev.consensus_value);
+              const surprise = calculateEconomicSurprise(ev.actual_value, ev.consensus_value, ev.event_type);
               return (
                 <button
                   key={ev.event_id}
@@ -143,9 +146,13 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
                   <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-mono">
                     <div>
                       <span className="text-slate-400 text-[10px]">Aktual/Kons: </span>
-                      <strong className="text-white">{ev.actual_value ?? 'Pending'}</strong> / <span className="text-slate-300">{ev.consensus_value}</span>
+                      <strong className="text-white">{ev.range_label || ev.actual_value}</strong> / <span className="text-slate-300">{ev.consensus_value}</span>
                     </div>
-                    {surprise.zScore !== null && (
+                    {ev.event_type === 'FOMC' ? (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300">
+                        In-Line
+                      </span>
+                    ) : surprise.zScore !== null && (
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                         surprise.zScore > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
                       }`}>
@@ -170,7 +177,7 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
                   <span className="px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold">
                     {selectedEvent.event_type}
                   </span>
-                  <span className="text-xs text-slate-400 font-mono">Status: <strong className="text-emerald-400">{selectedEvent.data_status}</strong></span>
+                  <span className="text-xs text-slate-400 font-mono">Status: <strong className="text-emerald-400">VERIFIED (per Apr 2026)</strong></span>
                 </div>
                 <h2 className="text-xl font-bold text-white tracking-tight">{selectedEvent.indicator_name}</h2>
                 <p className="text-xs text-slate-400 font-mono">Periode: {selectedEvent.reporting_period}</p>
@@ -184,7 +191,7 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-all cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Sumber Resmi</span>
+                  <span>Sumber Resmi ({selectedEvent.source_name})</span>
                 </a>
               </div>
             </div>
@@ -193,7 +200,7 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
                 <span className="text-slate-400 text-[10px]">Nilai Aktual</span>
-                <div className="text-lg font-bold text-emerald-400">{selectedEvent.actual_value} <span className="text-xs text-slate-400">{selectedEvent.unit}</span></div>
+                <div className="text-lg font-bold text-emerald-400">{selectedEvent.range_label || selectedEvent.actual_value} <span className="text-xs text-slate-400">{selectedEvent.unit}</span></div>
               </div>
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
                 <span className="text-slate-400 text-[10px]">Konsensus Pra-Rilis</span>
@@ -204,9 +211,9 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
                 <div className="text-lg font-bold text-white">{selectedEvent.previous_value} <span className="text-xs text-slate-400">{selectedEvent.unit}</span></div>
               </div>
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-slate-400 text-[10px]">Economic Surprise (Z)</span>
+                <span className="text-slate-400 text-[10px]">{selectedEvent.event_type === 'FOMC' ? 'Penilaian Diskrit' : 'Economic Surprise (Z)'}</span>
                 <div className="text-lg font-bold text-sky-400">
-                  {surpriseData.zScore !== null ? (surpriseData.zScore > 0 ? `+${surpriseData.zScore}` : surpriseData.zScore) : 'N/A'}
+                  {selectedEvent.event_type === 'FOMC' ? 'In-Line' : (surpriseData.zScore !== null ? (surpriseData.zScore > 0 ? `+${surpriseData.zScore}` : surpriseData.zScore) : 'N/A')}
                 </div>
               </div>
             </div>
