@@ -239,7 +239,15 @@ export function useMarketState() {
     const fetchLivePrices = async () => {
       try {
         const res = await fetch('/api/market/live-prices');
-        const data = await res.json();
+        if (!res.ok) return;
+        const text = await res.text();
+        if (!text || !text.trim().startsWith('{')) return;
+        let data: any = null;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          return;
+        }
         if (data && data.prices && isMounted) {
           // 1. Update watchlist
           setWatchlist(prev => prev.map(item => {
@@ -389,9 +397,16 @@ export function useMarketState() {
             assetName,
           }),
         });
-        const data = await res.json();
-        if (data.analysis) {
-          analysisText = data.analysis;
+        const text = await res.text();
+        if (text && text.trim().startsWith('{')) {
+          try {
+            const data = JSON.parse(text);
+            if (data && data.analysis) {
+              analysisText = data.analysis;
+            }
+          } catch {
+            // Ignore non-json
+          }
         }
       } catch (err) {
         console.error('AI analysis error:', err);
@@ -495,9 +510,16 @@ export function useMarketState() {
           candlestickPattern: oracleCandle,
         }),
       });
-      const data = await res.json();
-      if (data.oracleReport) {
-        setOracleAiReport(data.oracleReport);
+      const text = await res.text();
+      if (text && text.trim().startsWith('{')) {
+        try {
+          const data = JSON.parse(text);
+          if (data && data.oracleReport) {
+            setOracleAiReport(data.oracleReport);
+          }
+        } catch {
+          // Ignore non-json
+        }
       }
     } catch (e) {
       console.error('Failed to run Oracle AI:', e);

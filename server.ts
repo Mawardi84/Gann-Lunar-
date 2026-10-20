@@ -140,17 +140,24 @@ app.get('/api/market/live-prices', async (req, res) => {
             }),
           });
           if (resp.ok) {
-            const data = await resp.json();
-            if (data && Array.isArray(data.data)) {
-              for (const item of data.data) {
-                if (item.s && Array.isArray(item.d) && item.d.length >= 4) {
-                  tvResults[item.s] = {
-                    price: parseFloat(item.d[0]),
-                    high: parseFloat(item.d[1]),
-                    low: parseFloat(item.d[2]),
-                    change: parseFloat((item.d[3] || 0).toFixed(2)),
-                  };
+            const text = await resp.text();
+            if (text && text.trim().startsWith('{')) {
+              try {
+                const data = JSON.parse(text);
+                if (data && Array.isArray(data.data)) {
+                  for (const item of data.data) {
+                    if (item.s && Array.isArray(item.d) && item.d.length >= 4) {
+                      tvResults[item.s] = {
+                        price: parseFloat(item.d[0]),
+                        high: parseFloat(item.d[1]),
+                        low: parseFloat(item.d[2]),
+                        change: parseFloat((item.d[3] || 0).toFixed(2)),
+                      };
+                    }
+                  }
                 }
+              } catch {
+                // Ignore non-json responses from external scanner
               }
             }
           }
@@ -222,7 +229,7 @@ TUGAS ANALISIS:
 3. Evaluasi apakah kondisi ini memicu bias \`BULLISH\`, \`BEARISH\`, \`MIXED\`, atau \`NO_CLEAR_BIAS\`.
 4. Berikan rangkuman analisis terstruktur dalam Bahasa Indonesia profesional.`;
 
-    const response = await ai.models.generateContent({
+    const aiPromise = ai.models.generateContent({
       model: 'gemini-3.8-flash',
       contents: prompt,
       config: {
@@ -231,7 +238,26 @@ TUGAS ANALISIS:
       },
     });
 
-    res.json({ analysis: response.text || 'Analisis fundamental tidak tersedia.' });
+    const timeoutPromise = new Promise<{ text?: string }>((_, reject) => {
+      setTimeout(() => reject(new Error('AI request timeout')), 10000);
+    });
+
+    let analysisText = '';
+    try {
+      const response = await Promise.race([aiPromise, timeoutPromise]);
+      analysisText = response.text || '';
+    } catch {
+      // Deterministic Quantitative Grounded Fallback
+      analysisText = `[Analisis Kuantitatif Fundamental - Mode Deterministik]\n` +
+        `• Indikator: ${indicatorName} (${eventType})\n` +
+        `• Data Rilis: Aktual ${actual} ${unit} vs Konsensus ${consensus} ${unit} (Sebelumnya: ${previous} ${unit})\n` +
+        `• Sumber Rilis: ${sourceRef || 'Lembaga Resmi (BLS / Federal Reserve)'}\n\n` +
+        `Implikasi Makroekonomi terhadap XAU/USD:\n` +
+        `Data rilis ini menunjukkan deviasi terhadap konsensus pasar. Untuk instrumen emas (XAU/USD), reaksi harga umumnya berbanding terbalik dengan arah pergerakan Dolar AS (DXY) dan imbal hasil riil obligasi pemerintah AS (TIPS). Jika data lebih kuat dari ekspektasi pasar, kecenderungan jangka pendek adalah menekan emas; jika lebih lemah atau in-line, tekanan jual mereda.\n\n` +
+        `CATATAN: Data ini adalah data historis referensi per April 2026. Kondisi pasar saat ini mungkin telah mengalami pergeseran siklus sejak tanggal rilis tersebut.`;
+    }
+
+    res.json({ analysis: analysisText });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Gagal menghasilkan analisis fundamental AI.';
     console.error('Gemini Fundamental API Error:', error);

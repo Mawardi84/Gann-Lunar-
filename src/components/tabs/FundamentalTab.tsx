@@ -42,8 +42,16 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
           sourceRef: event.source_reference
         })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Gagal menganalisis fundamental.');
+      const text = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(`Server tidak mengembalikan format JSON yang valid (${res.status}). Silakan coba lagi.`);
+      }
+      if (!res.ok || !data) {
+        throw new Error(data?.error || `Gagal menganalisis fundamental (HTTP ${res.status}).`);
+      }
       setAiAnalysisResult(prev => ({ ...prev, [event.event_id]: data.analysis }));
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
