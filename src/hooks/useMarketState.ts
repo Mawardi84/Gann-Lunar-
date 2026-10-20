@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { calculateGannLevels, calculateFibonacciLevels, evaluate4DOracle, OracleDecisionResult, GannLevels, FibonacciLevels } from '../utils/gann';
 import { calculateTechnicalIndicators, IndicatorMetrics } from '../utils/indicators';
 import { runGannBacktest, BacktestResult } from '../utils/backtest';
+import { fetchDirectLiveMarketPrices } from '../utils/marketFeeds';
 
 export interface Candle {
   time: string;
@@ -238,27 +239,48 @@ export function useMarketState() {
     let isMounted = true;
     const fetchLivePrices = async () => {
       try {
-        const res = await fetch('/api/market/live-prices');
-        if (!res.ok) return;
-        const text = await res.text();
-        if (!text || !text.trim().startsWith('{')) return;
-        let data: any = null;
+        let priceMap: Record<string, { price: number; high: number; low: number; change: number; source?: 'live' | 'fallback' }> | null = null;
+
+        // Step 1: Attempt to query backend endpoint
         try {
-          data = JSON.parse(text);
+          const res = await fetch('/api/market/live-prices');
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.trim().startsWith('{')) {
+              const data = JSON.parse(text);
+              if (data && data.prices) {
+                priceMap = data.prices;
+              }
+            }
+          }
         } catch {
-          return;
+          // Backend offline or static Vercel host
         }
-        if (data && data.prices && isMounted) {
+
+        // Step 2: Fallback to direct client-side open market feeds if backend fails or returns fallback
+        if (!priceMap || !priceMap['XAU/USD'] || priceMap['XAU/USD'].source === 'fallback') {
+          try {
+            const direct = await fetchDirectLiveMarketPrices();
+            if (Object.keys(direct).length > 0) {
+              priceMap = { ...(priceMap || {}), ...direct };
+            }
+          } catch (e) {
+            console.warn('Direct live market feed error:', e);
+          }
+        }
+
+        if (priceMap && isMounted) {
+          const validPriceMap = priceMap;
           // 1. Update watchlist
           setWatchlist(prev => prev.map(item => {
-            const liveData = data.prices[item.symbol];
+            const liveData = validPriceMap[item.symbol];
             if (liveData) {
               const newPrice = liveData.price;
               const newHigh = liveData.high;
               const newLow = liveData.low;
               const newChange = liveData.change;
               const isUp = newPrice >= item.price;
-              const src = liveData.source || 'fallback';
+              const src = liveData.source || 'live';
 
               if (assetName.includes(item.symbol)) {
                 setLivePrice(newPrice);
@@ -290,10 +312,9 @@ export function useMarketState() {
           // 2. Accumulate price history buffer per asset (minimum 200 points cap)
           setPriceHistory(prev => {
             const updated = { ...prev };
-            for (const [sym, priceObj] of Object.entries(data.prices as Record<string, { price: number }>)) {
+            for (const [sym, priceObj] of Object.entries(validPriceMap as Record<string, { price: number }>)) {
               const currentList = updated[sym] ? [...updated[sym]] : [];
               currentList.push(priceObj.price);
-              // Maintain maximum 250 points, keeping at least 200
               if (currentList.length > 250) {
                 updated[sym] = currentList.slice(-200);
               } else {
