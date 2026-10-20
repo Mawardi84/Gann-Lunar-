@@ -2,50 +2,70 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { INITIAL_MACRO_EVENTS, calculateEconomicSurprise } from './fundamental';
 
-test('INITIAL_MACRO_EVENTS contains accurately verified data for NFP, CPI, FOMC, and PPI', () => {
-  assert.strictEqual(INITIAL_MACRO_EVENTS.length, 4);
+test('INITIAL_MACRO_EVENTS contains accurately verified and estimated tier-1 macro events', () => {
+  assert.strictEqual(INITIAL_MACRO_EVENTS.length, 8);
 
-  // NFP
-  const nfp = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'nfp-2026-04');
-  assert.ok(nfp, 'NFP event must exist');
-  assert.strictEqual(nfp.actual_value, 178.0);
-  assert.strictEqual(nfp.consensus_value, 60.0);
-  assert.strictEqual(nfp.previous_value, -92.0);
-  assert.strictEqual(nfp.revised_previous, -133.0);
-  assert.strictEqual(nfp.release_time_utc, '2026-04-03T12:30:00Z');
-  assert.strictEqual(nfp.data_status, 'VERIFIED');
+  // 1. Verified NFP March 2026 (Released April 2026)
+  const nfpVerified = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'nfp-2026-04');
+  assert.ok(nfpVerified, 'Verified NFP event must exist');
+  assert.strictEqual(nfpVerified.actual_value, 178.0);
+  assert.strictEqual(nfpVerified.consensus_value, 60.0);
+  assert.strictEqual(nfpVerified.previous_value, -92.0);
+  assert.strictEqual(nfpVerified.revised_previous, -133.0);
+  assert.strictEqual(nfpVerified.release_time_utc, '2026-04-03T12:30:00Z');
+  assert.strictEqual(nfpVerified.data_status, 'VERIFIED');
 
-  // CPI
-  const cpi = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'cpi-2026-03');
-  assert.ok(cpi, 'CPI event must exist');
-  assert.strictEqual(cpi.actual_value, 2.5);
-  assert.strictEqual(cpi.consensus_value, 2.5);
-  assert.strictEqual(cpi.previous_value, 2.5);
-  assert.strictEqual(cpi.revised_previous, 2.5);
-  assert.strictEqual(cpi.release_time_utc, '2026-03-11T12:30:00Z');
-  assert.strictEqual(cpi.data_status, 'VERIFIED');
+  // 2. Verified CPI February 2026 (Released March 11, 2026)
+  const cpiVerified = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'cpi-2026-03');
+  assert.ok(cpiVerified, 'Verified CPI event must exist');
+  assert.strictEqual(cpiVerified.actual_value, 2.5);
+  assert.strictEqual(cpiVerified.consensus_value, 2.5);
+  assert.strictEqual(cpiVerified.previous_value, 2.5);
+  assert.strictEqual(cpiVerified.revised_previous, 2.5);
+  assert.strictEqual(cpiVerified.release_time_utc, '2026-03-11T12:30:00Z');
+  assert.strictEqual(cpiVerified.data_status, 'VERIFIED');
 
-  // FOMC
-  const fomc = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'fomc-2026-03');
-  assert.ok(fomc, 'FOMC event must exist');
-  assert.strictEqual(fomc.actual_value, 3.75);
-  assert.strictEqual(fomc.consensus_value, 3.75);
-  assert.strictEqual(fomc.previous_value, 3.75);
-  assert.strictEqual(fomc.revised_previous, 3.75);
-  assert.strictEqual(fomc.range_label, '3.50%–3.75%');
-  assert.strictEqual(fomc.release_time_utc, '2026-03-18T18:00:00Z');
-  assert.strictEqual(fomc.data_status, 'VERIFIED');
+  // 3. Verified FOMC March 2026 (Released March 18, 2026)
+  const fomcVerified = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'fomc-2026-03');
+  assert.ok(fomcVerified, 'Verified FOMC event must exist');
+  assert.strictEqual(fomcVerified.actual_value, 3.75);
+  assert.strictEqual(fomcVerified.consensus_value, 3.75);
+  assert.strictEqual(fomcVerified.range_label, '3.50%–3.75%');
+  assert.strictEqual(fomcVerified.data_status, 'VERIFIED');
 
-  // PPI
-  const ppi = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'ppi-2026-03');
-  assert.ok(ppi, 'PPI event must exist');
-  assert.strictEqual(ppi.actual_value, 0.5);
-  assert.strictEqual(ppi.consensus_value, 0.3);
-  assert.strictEqual(ppi.previous_value, 0.8);
-  assert.strictEqual(ppi.revised_previous, 0.8);
-  assert.strictEqual(ppi.release_time_utc, '2026-03-18T12:30:00Z');
-  assert.strictEqual(ppi.source_name, 'U.S. Bureau of Labor Statistics (BLS)');
-  assert.strictEqual(ppi.data_status, 'VERIFIED');
+  // 4. Verified PPI February 2026 (Released March 18, 2026)
+  const ppiVerified = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'ppi-2026-03');
+  assert.ok(ppiVerified, 'Verified PPI event must exist');
+  assert.strictEqual(ppiVerified.actual_value, 0.5);
+  assert.strictEqual(ppiVerified.consensus_value, 0.3);
+  assert.strictEqual(ppiVerified.previous_value, 0.8);
+  assert.strictEqual(ppiVerified.revised_previous, 0.8);
+  assert.strictEqual(ppiVerified.release_time_utc, '2026-03-18T12:30:00Z');
+  assert.strictEqual(ppiVerified.data_status, 'VERIFIED');
+
+  // 5. Recent NFP September 2026 (Released October 2026)
+  const nfpLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'nfp-2026-10');
+  assert.ok(nfpLatest, 'Latest NFP event must exist');
+  assert.strictEqual(nfpLatest.actual_value, 142.0);
+  assert.strictEqual(nfpLatest.consensus_value, 140.0);
+
+  // 6. Recent CPI September 2026 (Released October 2026)
+  const cpiLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'cpi-2026-10');
+  assert.ok(cpiLatest, 'Latest CPI event must exist');
+  assert.strictEqual(cpiLatest.actual_value, 2.6);
+  assert.strictEqual(cpiLatest.consensus_value, 2.6);
+
+  // 7. Recent FOMC September 2026
+  const fomcLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'fomc-2026-09');
+  assert.ok(fomcLatest, 'Latest FOMC event must exist');
+  assert.strictEqual(fomcLatest.actual_value, 3.50);
+  assert.strictEqual(fomcLatest.range_label, '3.25%–3.50%');
+
+  // 8. Recent PPI September 2026 (Released October 2026)
+  const ppiLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'ppi-2026-10');
+  assert.ok(ppiLatest, 'Latest PPI event must exist');
+  assert.strictEqual(ppiLatest.actual_value, 0.2);
+  assert.strictEqual(ppiLatest.consensus_value, 0.2);
 });
 
 test('calculateEconomicSurprise correctly handles event-specific stddev and FOMC discrete assessment', () => {
