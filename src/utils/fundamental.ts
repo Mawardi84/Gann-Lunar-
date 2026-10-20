@@ -51,7 +51,7 @@ export const INITIAL_MACRO_EVENTS: MacroEventRecord[] = [
     previous_value: 2.5,
     revised_previous: 2.5,
     unit: '%',
-    release_time_utc: '2026-03-12T12:30:00Z',
+    release_time_utc: '2026-03-11T12:30:00Z',
     source_name: 'U.S. Bureau of Labor Statistics (BLS)',
     source_reference: 'https://www.bls.gov/cpi/',
     data_status: 'VERIFIED',
