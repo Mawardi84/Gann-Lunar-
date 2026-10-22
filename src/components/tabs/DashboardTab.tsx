@@ -8,6 +8,7 @@ import {
 import { MarketState, Candle, WatchlistItem } from '../../hooks/useMarketState';
 import { IndicatorStudySelector } from '../IndicatorStudySelector';
 import { TechnicalIndicatorsPanel } from '../TechnicalIndicatorsPanel';
+import { TimeframeSelectorBar } from '../TimeframeSelectorBar';
 
 interface DashboardTabProps {
   state: MarketState;
@@ -45,6 +46,8 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
     technicalMetrics,
     priceVal,
     chartInterval,
+    currentTimeframeLevels,
+    changeTimeframe,
     chartStyle,
     chartTheme,
     chartTimezone,
@@ -233,6 +236,9 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
             </div>
           </div>
 
+          {/* Dynamic Timeframe Selector Bar with Area Entry Detection */}
+          <TimeframeSelectorBar state={state} title="Filter Timeframe Trading & Deteksi Area Entry" />
+
           {/* Form Parameters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
             <div>
@@ -252,7 +258,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
             <div>
               <label className="block text-slate-300 font-medium mb-1 flex items-center justify-between">
                 <span>Swing High</span>
-                <span className="text-[10px] text-slate-400 font-mono">Chart: {liveHigh.toLocaleString()}</span>
+                <span className="text-[10px] text-slate-400 font-mono">TF: {(currentTimeframeLevels?.high ?? liveHigh).toLocaleString()} (24h: {liveHigh.toLocaleString()})</span>
               </label>
               <input
                 type="number"
@@ -266,7 +272,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
             <div>
               <label className="block text-slate-300 font-medium mb-1 flex items-center justify-between">
                 <span>Swing Low</span>
-                <span className="text-[10px] text-slate-400 font-mono">Chart: {liveLow.toLocaleString()}</span>
+                <span className="text-[10px] text-slate-400 font-mono">TF: {(currentTimeframeLevels?.low ?? liveLow).toLocaleString()} (24h: {liveLow.toLocaleString()})</span>
               </label>
               <input
                 type="number"

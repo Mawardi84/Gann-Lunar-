@@ -7,7 +7,7 @@ import React, { lazy, Suspense } from 'react';
 import { 
   Orbit, Sparkles, ArrowRight, BookOpen, Calculator, BarChart3, 
   Layers, Target, Gauge, Newspaper, CandlestickChart, History, 
-  FastForward, Rewind, Pin, PinOff, Eye, EyeOff, Building2 
+  FastForward, Rewind, Pin, PinOff, Eye, EyeOff, Building2, Calendar 
 } from 'lucide-react';
 
 import { useMarketState } from './hooks/useMarketState';
@@ -22,6 +22,7 @@ const ChartTab = lazy(() => import('./components/tabs/ChartTab').then(m => ({ de
 const BacktestTab = lazy(() => import('./components/tabs/BacktestTab').then(m => ({ default: m.BacktestTab })));
 const JournalTab = lazy(() => import('./components/tabs/JournalTab').then(m => ({ default: m.JournalTab })));
 const FundamentalTab = lazy(() => import('./components/tabs/FundamentalTab').then(m => ({ default: m.FundamentalTab })));
+const EconomicCalendarTab = lazy(() => import('./components/tabs/EconomicCalendarTab').then(m => ({ default: m.EconomicCalendarTab })));
 
 export default function App() {
   const state = useMarketState();
@@ -114,6 +115,22 @@ export default function App() {
             >
               <Building2 className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
               <span>Fundamental</span>
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('calendar')}
+              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'calendar'
+                  ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform" />
+              <span>Kalender</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-mono font-bold">
+                LIVE
+              </span>
               <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
             </button>
 
@@ -308,6 +325,7 @@ export default function App() {
             <button onClick={() => setActiveTab('oracle')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'oracle' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>4D Architect</button>
             <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Market Space</button>
             <button onClick={() => setActiveTab('fundamental')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'fundamental' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Fundamental</button>
+            <button onClick={() => setActiveTab('calendar')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'calendar' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Kalender</button>
             <button onClick={() => setActiveTab('indicators')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'indicators' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Indikator</button>
             <button onClick={() => setActiveTab('signal')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'signal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Sinyal</button>
             <button onClick={() => setActiveTab('chart')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'chart' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Chart</button>
@@ -347,6 +365,10 @@ export default function App() {
 
           {activeTab === 'fundamental' && (
             <FundamentalTab state={state} />
+          )}
+
+          {activeTab === 'calendar' && (
+            <EconomicCalendarTab state={state} />
           )}
 
           {activeTab === 'indicators' && (
@@ -401,6 +423,7 @@ export default function App() {
             <button onClick={() => setActiveTab('oracle')} className="hover:text-amber-300 transition-colors cursor-pointer">4D Architect</button>
             <button onClick={() => setActiveTab('dashboard')} className="hover:text-amber-300 transition-colors cursor-pointer">Market Space</button>
             <button onClick={() => setActiveTab('fundamental')} className="hover:text-amber-300 transition-colors cursor-pointer">Fundamental</button>
+            <button onClick={() => setActiveTab('calendar')} className="hover:text-amber-300 transition-colors cursor-pointer">Kalender</button>
             <button onClick={() => setActiveTab('indicators')} className="hover:text-amber-300 transition-colors cursor-pointer">Indikator</button>
             <button onClick={() => setActiveTab('signal')} className="hover:text-amber-300 transition-colors cursor-pointer">Sinyal</button>
             <button onClick={() => setActiveTab('calculator')} className="hover:text-amber-300 transition-colors cursor-pointer">Kalkulator Gann</button>

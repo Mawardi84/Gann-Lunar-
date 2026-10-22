@@ -3,6 +3,13 @@ import { calculateGannLevels, calculateFibonacciLevels, evaluate4DOracle, Oracle
 import { calculateTechnicalIndicators, IndicatorMetrics } from '../utils/indicators';
 import { runGannBacktest, BacktestResult } from '../utils/backtest';
 import { fetchDirectLiveMarketPrices } from '../utils/marketFeeds';
+import { 
+  calculateTimeframeLevels, 
+  TimeframeLevelResult, 
+  TIMEFRAME_CONFIGS, 
+  TimeframeId, 
+  fetchBinanceTimeframeHighLow 
+} from '../utils/timeframeLevels';
 
 export interface Candle {
   time: string;
@@ -72,7 +79,8 @@ export type TabType =
   | 'chart' 
   | 'backtest' 
   | 'journal'
-  | 'fundamental';
+  | 'fundamental'
+  | 'calendar';
 
 export const INITIAL_WATCHLIST: WatchlistItem[] = [
   { symbol: 'XAU/USD', name: 'Gold Spot', tvSymbol: 'OANDA:XAUUSD', price: 4164.86, high: 4199.08, low: 4147.16, change: -0.14, isUp: false, factor: 0.125, source: 'fallback' },
@@ -292,8 +300,9 @@ export function useMarketState() {
 
                 if (autoSyncEnabled) {
                   setPivotInput(newPrice.toString());
-                  setOracleSwingHigh(newHigh.toString());
-                  setOracleSwingLow(newLow.toString());
+                  const tfLevels = calculateTimeframeLevels(newPrice, newHigh, newLow, chartInterval);
+                  setOracleSwingHigh(tfLevels.high.toString());
+                  setOracleSwingLow(tfLevels.low.toString());
                 }
               }
               return {
@@ -340,7 +349,7 @@ export function useMarketState() {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [assetName, autoSyncEnabled]);
+  }, [assetName, autoSyncEnabled, chartInterval]);
 
   // Gann calculation
   const calculateGann = useCallback(async (
@@ -465,6 +474,60 @@ export function useMarketState() {
     calculateGann(false);
   }, [volatility]);
 
+  // Derived current symbol string (e.g. 'XAU/USD')
+  const currentSymbol = useMemo(() => {
+    const match = assetName.split(' ')[0];
+    return match || 'XAU/USD';
+  }, [assetName]);
+
+  const currentAssetHistory = useMemo(() => {
+    return priceHistory[currentSymbol] || [];
+  }, [priceHistory, currentSymbol]);
+
+  const changeTimeframe = useCallback(async (newInterval: string) => {
+    setChartInterval(newInterval);
+
+    let tfHigh: number | null = null;
+    let tfLow: number | null = null;
+
+    const cryptoMap: Record<string, string> = {
+      'BTC/USD': 'BTCUSDT',
+      'ETH/USD': 'ETHUSDT',
+      'SOL/USD': 'SOLUSDT',
+      'BNB/USD': 'BNBUSDT',
+      'XRP/USD': 'XRPUSDT',
+    };
+    const bSymbol = cryptoMap[currentSymbol];
+    if (bSymbol && (newInterval in TIMEFRAME_CONFIGS)) {
+      try {
+        const klineResult = await fetchBinanceTimeframeHighLow(bSymbol, newInterval as TimeframeId);
+        if (klineResult) {
+          tfHigh = klineResult.high;
+          tfLow = klineResult.low;
+        }
+      } catch (err) {
+        console.warn('Binance kline fetch fallback to ATR model:', err);
+      }
+    }
+
+    const calculated = calculateTimeframeLevels(
+      livePrice,
+      tfHigh ?? liveHigh,
+      tfLow ?? liveLow,
+      newInterval,
+      currentAssetHistory
+    );
+
+    const finalHigh = tfHigh ?? calculated.high;
+    const finalLow = tfLow ?? calculated.low;
+    const finalFactor = calculated.recommendedFactor;
+
+    setOracleSwingHigh(finalHigh.toString());
+    setOracleSwingLow(finalLow.toString());
+    setFactorInput(finalFactor.toString());
+    calculateGann(false, livePrice, finalFactor, finalHigh, finalLow);
+  }, [currentSymbol, livePrice, liveHigh, liveLow, currentAssetHistory, calculateGann]);
+
   const handleSelectWatchlistAsset = useCallback((item: WatchlistItem) => {
     setAssetName(`${item.symbol} (${item.name})`);
     setTvSymbol(item.tvSymbol);
@@ -475,18 +538,22 @@ export function useMarketState() {
     setIsPriceUp(item.isUp);
     if (item.source) setPriceSource(item.source);
 
+    const tfLevels = calculateTimeframeLevels(item.price, item.high, item.low, chartInterval);
     setPivotInput(item.price.toString());
-    setOracleSwingHigh(item.high.toString());
-    setOracleSwingLow(item.low.toString());
-    calculateGann(false, item.price, item.factor, item.high, item.low);
-  }, [calculateGann]);
+    setOracleSwingHigh(tfLevels.high.toString());
+    setOracleSwingLow(tfLevels.low.toString());
+    setFactorInput(tfLevels.recommendedFactor.toString());
+    calculateGann(false, item.price, tfLevels.recommendedFactor, tfLevels.high, tfLevels.low);
+  }, [calculateGann, chartInterval]);
 
   const handleSyncAllParametersFromChart = useCallback(() => {
+    const tfLevels = calculateTimeframeLevels(livePrice, liveHigh, liveLow, chartInterval, currentAssetHistory);
     setPivotInput(livePrice.toString());
-    setOracleSwingHigh(liveHigh.toString());
-    setOracleSwingLow(liveLow.toString());
-    calculateGann(false, livePrice, parseFloat(factorInput), liveHigh, liveLow);
-  }, [livePrice, liveHigh, liveLow, factorInput, calculateGann]);
+    setOracleSwingHigh(tfLevels.high.toString());
+    setOracleSwingLow(tfLevels.low.toString());
+    setFactorInput(tfLevels.recommendedFactor.toString());
+    calculateGann(false, livePrice, tfLevels.recommendedFactor, tfLevels.high, tfLevels.low);
+  }, [livePrice, liveHigh, liveLow, chartInterval, currentAssetHistory, calculateGann]);
 
   const handleManualSyncTradingViewPrice = useCallback(() => {
     const entered = prompt(`Masukkan harga aktual yang tertera di chart TradingView (${assetName}):`, livePrice.toString());
@@ -499,12 +566,14 @@ export function useMarketState() {
   }, [assetName, livePrice, factorInput, calculateGann]);
 
   const handleAutoSyncPrice = useCallback(() => {
+    const tfLevels = calculateTimeframeLevels(livePrice, liveHigh, liveLow, chartInterval, currentAssetHistory);
     setPivotInput(livePrice.toString());
-    setOracleSwingHigh(liveHigh.toString());
-    setOracleSwingLow(liveLow.toString());
-    calculateGann(false, livePrice, parseFloat(factorInput), liveHigh, liveLow);
+    setOracleSwingHigh(tfLevels.high.toString());
+    setOracleSwingLow(tfLevels.low.toString());
+    setFactorInput(tfLevels.recommendedFactor.toString());
+    calculateGann(false, livePrice, tfLevels.recommendedFactor, tfLevels.high, tfLevels.low);
     setMatrixSynced(true);
-  }, [livePrice, liveHigh, liveLow, factorInput, calculateGann]);
+  }, [livePrice, liveHigh, liveLow, chartInterval, currentAssetHistory, calculateGann]);
 
   const handleSynchronize4DMatrix = useCallback(() => {
     setSyncGlowing(true);
@@ -549,21 +618,22 @@ export function useMarketState() {
     }
   }, [assetName, pivotInput, oracleSwingHigh, oracleSwingLow, oracleLunarPhase, oracleAngle, oracleCandle]);
 
-  // Derived current symbol string (e.g. 'XAU/USD')
-  const currentSymbol = useMemo(() => {
-    const match = assetName.split(' ')[0];
-    return match || 'XAU/USD';
-  }, [assetName]);
-
-  const currentAssetHistory = useMemo(() => {
-    return priceHistory[currentSymbol] || [];
-  }, [priceHistory, currentSymbol]);
-
   // 4D Mathematical Computations
   const priceVal = parseFloat(pivotInput) || livePrice;
   const sHigh = parseFloat(oracleSwingHigh) || liveHigh;
   const sLow = parseFloat(oracleSwingLow) || liveLow;
   const angleNum = parseFloat(oracleAngle) || 45;
+
+  // Timeframe-specific High, Low, Range, and Confluence Entry Zone calculation
+  const currentTimeframeLevels: TimeframeLevelResult = useMemo(() => {
+    return calculateTimeframeLevels(
+      priceVal,
+      sHigh,
+      sLow,
+      chartInterval,
+      currentAssetHistory
+    );
+  }, [priceVal, sHigh, sLow, chartInterval, currentAssetHistory]);
 
   const oracleResult: OracleDecisionResult = useMemo(() => {
     return evaluate4DOracle(
@@ -729,6 +799,8 @@ ${oracleResult.decision === 'EXECUTE'
     areAllParametersMatched,
     chartInterval,
     setChartInterval,
+    currentTimeframeLevels,
+    changeTimeframe,
     chartStyle,
     setChartStyle,
     chartTheme,

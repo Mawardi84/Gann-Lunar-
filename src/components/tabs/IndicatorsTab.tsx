@@ -3,6 +3,7 @@ import { Gauge, Zap, CandlestickChart } from 'lucide-react';
 import { MarketState } from '../../hooks/useMarketState';
 import { IndicatorStudySelector } from '../IndicatorStudySelector';
 import { TechnicalIndicatorsPanel } from '../TechnicalIndicatorsPanel';
+import { TimeframeSelectorBar } from '../TimeframeSelectorBar';
 
 interface IndicatorsTabProps {
   state: MarketState;
@@ -107,6 +108,8 @@ export const IndicatorsTab: React.FC<IndicatorsTabProps> = ({ state }) => {
           onToggleStudy={handleToggleStudy}
           onSelectPreset={handleSelectStudyPreset}
         />
+
+        <TimeframeSelectorBar state={state} variant="compact" title="Timeframe Analisis Indikator & Deteksi Entry" />
 
         <div className="h-[420px] w-full bg-slate-950 rounded-xl border border-slate-800 overflow-hidden">
           <iframe

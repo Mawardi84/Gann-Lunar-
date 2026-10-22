@@ -9,6 +9,7 @@ import {
 import { MarketState, Candle } from '../../hooks/useMarketState';
 import { IndicatorStudySelector } from '../IndicatorStudySelector';
 import { TechnicalIndicatorsPanel } from '../TechnicalIndicatorsPanel';
+import { TimeframeSelectorBar } from '../TimeframeSelectorBar';
 
 interface OracleTabProps {
   state: MarketState;
@@ -69,6 +70,8 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
     saveToJournal,
     structuredReportText,
     chartInterval,
+    currentTimeframeLevels,
+    changeTimeframe,
     chartStyle,
     chartTheme,
     chartTimezone,
@@ -155,9 +158,14 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
                   </span>
                 </div>
 
-                <span className="text-[11px] text-slate-400 font-mono">
-                  24h High: <strong className="text-white">{liveHigh.toLocaleString()}</strong> | 24h Low: <strong className="text-white">{liveLow.toLocaleString()}</strong>
-                </span>
+                <div className="flex items-center gap-2 flex-wrap text-[11px] font-mono">
+                  <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
+                    TF [{currentTimeframeLevels?.label ?? 'D'}] H: <strong className="text-white">${(currentTimeframeLevels?.high ?? liveHigh).toLocaleString()}</strong> | L: <strong className="text-white">${(currentTimeframeLevels?.low ?? liveLow).toLocaleString()}</strong>
+                  </span>
+                  <span className="text-slate-400">
+                    24h: {liveHigh.toLocaleString()} / {liveLow.toLocaleString()}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -298,6 +306,9 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
           </div>
         </div>
 
+        {/* Dynamic Timeframe Selector Bar with Area Entry Detection */}
+        <TimeframeSelectorBar state={state} title="Filter Timeframe Eksekusi & Deteksi Area Entry" />
+
         {/* Calculator Inputs Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-xs">
           <div className={`p-4 rounded-2xl border transition-all ${isPivotMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
@@ -331,7 +342,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
           <div className={`p-4 rounded-2xl border transition-all ${isHighMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
             <div className="flex items-center justify-between mb-2">
               <label className="text-slate-300 font-semibold">Ayunan Atas (Swing High)</label>
-              <span className="text-[10px] font-mono text-slate-400">High: {liveHigh.toLocaleString()}</span>
+              <span className="text-[10px] font-mono text-slate-400">TF: {(currentTimeframeLevels?.high ?? liveHigh).toLocaleString()} (24h: {liveHigh.toLocaleString()})</span>
             </div>
             <input
               type="number"
@@ -343,13 +354,13 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
               }}
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 font-mono text-white text-base font-bold focus:outline-none focus:border-amber-500"
             />
-            <p className="text-[11px] text-slate-400 mt-2 font-mono">Titik awal ayunan gelombang harga</p>
+            <p className="text-[11px] text-slate-400 mt-2 font-mono">Titik awal ayunan gelombang TF {currentTimeframeLevels?.label ?? 'D'}</p>
           </div>
 
           <div className={`p-4 rounded-2xl border transition-all ${isLowMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
             <div className="flex items-center justify-between mb-2">
               <label className="text-slate-300 font-semibold">Ayunan Bawah (Swing Low)</label>
-              <span className="text-[10px] font-mono text-slate-400">Low: {liveLow.toLocaleString()}</span>
+              <span className="text-[10px] font-mono text-slate-400">TF: {(currentTimeframeLevels?.low ?? liveLow).toLocaleString()} (24h: {liveLow.toLocaleString()})</span>
             </div>
             <input
               type="number"
@@ -361,7 +372,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
               }}
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 font-mono text-white text-base font-bold focus:outline-none focus:border-amber-500"
             />
-            <p className="text-[11px] text-slate-400 mt-2 font-mono">Titik akhir ayunan gelombang harga</p>
+            <p className="text-[11px] text-slate-400 mt-2 font-mono">Titik akhir ayunan gelombang TF {currentTimeframeLevels?.label ?? 'D'}</p>
           </div>
 
           <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800">
@@ -488,25 +499,33 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
             {/* KARTU 1: Harga */}
             <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 hover:border-amber-500/50 transition-all space-y-3 relative overflow-hidden group">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-                <span className="text-amber-400 font-extrabold text-sm">1. Arsitektur Harga (Zona Konfluensi):</span>
+                <div>
+                  <span className="text-amber-400 font-extrabold text-sm block">1. Arsitektur Harga (Zona Konfluensi):</span>
+                  <span className="text-[10px] text-slate-400">Timeframe: <strong className="text-white">{currentTimeframeLevels?.label ?? 'D'} ({currentTimeframeLevels?.name ?? 'Daily'})</strong></span>
+                </div>
                 <Target className="w-4 h-4 text-amber-400" />
               </div>
               <div className="text-slate-300 space-y-2 leading-relaxed">
                 <p>
-                  <strong>Rumus Gann Square of 9:</strong> (√{priceVal} ± 0.125)²<br />
+                  <strong>Rumus Gann Square of 9:</strong> (√{priceVal} ± {currentTimeframeLevels?.recommendedFactor ?? 0.125})²<br />
                   • Support S1 = <span className="text-emerald-400 font-bold">{gannVals.sup1.toFixed(2)}</span><br />
                   • Resisten R1 = <span className="text-rose-400 font-bold">{gannVals.res1.toFixed(2)}</span>
                 </p>
                 <p>
-                  <strong>Fibonacci Retracement (High {sHigh} ke Low {sLow}):</strong><br />
+                  <strong>Fibonacci Retracement (High {sHigh} ke Low {sLow} | Rentang: {(sHigh - sLow).toFixed(2)}):</strong><br />
                   • Level 50.0% = <span className="text-indigo-300 font-bold">{fibVals.fib500.toFixed(2)}</span><br />
                   • Level 61.8% (Golden Pocket) = <span className="text-purple-400 font-bold">{fibVals.fib618.toFixed(2)}</span>
                 </p>
-                <div className="pt-2 border-t border-slate-800/80 text-amber-300">
-                  <strong>Titik Irisan Zona Konfluensi:</strong><br />
-                  <span className="text-sm font-bold text-white bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700 inline-block mt-1">
-                    {confluenceZoneText}
-                  </span>
+                <div className="pt-2 border-t border-slate-800/80 text-amber-300 space-y-1">
+                  <div>
+                    <strong>Titik Irisan Zona Konfluensi (Area Entry):</strong><br />
+                    <span className="text-sm font-bold text-white bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700 inline-block mt-1">
+                      {confluenceZoneText}
+                    </span>
+                  </div>
+                  <div className="text-[11px] font-sans text-emerald-400/90 font-semibold">
+                    ● {currentTimeframeLevels?.entryZone?.statusText ?? 'Area Entry Terdeteksi'}
+                  </div>
                 </div>
               </div>
             </div>

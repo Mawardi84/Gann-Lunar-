@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { MarketState } from '../../hooks/useMarketState';
 import { INITIAL_MACRO_EVENTS, MacroEventRecord, calculateEconomicSurprise } from '../../utils/fundamental';
+import { EconomicCalendarTab } from './EconomicCalendarTab';
 
 interface FundamentalTabProps {
   state: MarketState;
@@ -44,6 +45,7 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
 
   const [selectedEventId, setSelectedEventId] = useState<string>(events[0]?.event_id || INITIAL_MACRO_EVENTS[0].event_id);
   const [filterType, setFilterType] = useState<string>('ALL');
+  const [subView, setSubView] = useState<'calendar' | 'audit'>('calendar');
   const [aiLoading, setAiLoading] = useState<boolean>(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<Record<string, string>>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -207,45 +209,81 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-full text-xs font-mono font-bold flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                QUANTITATIVE FUNDAMENTAL ANALYSIS ENGINE
-              </span>
-              <span className="px-2.5 py-1 bg-blue-500/15 text-blue-300 border border-blue-500/30 rounded-full text-[11px] font-mono flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-blue-400" />
-                Data referensi makro per {latestDateLabel} — {events.length} rilis data tercatat
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Analisis Makroekonomi & Kejutan Statistik
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Pusat audit rilis data tier-1 AS (FOMC, NFP, CPI, PPI). Mencegah look-ahead bias dengan verifikasi konsensus pra-rilis, perhitungan <em>Economic Surprise Z-score</em>, dan penjelasan AI berbasis dokumen resmi BLS/Federal Reserve.
-            </p>
-          </div>
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Subview Selector */}
+      <div className="flex items-center justify-between gap-4 p-2 bg-slate-900/90 border border-slate-800 rounded-2xl flex-wrap">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSubView('calendar')}
+            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              subView === 'calendar'
+                ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md shadow-amber-500/20'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Kalender Real-Time (Live Stream & Radar)</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold">
+              LIVE
+            </span>
+          </button>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-center shrink-0 space-y-1 w-full sm:w-auto">
-              <span className="text-[10px] text-slate-400 font-mono uppercase">Spot Gold (XAU/USD)</span>
-              <div className="text-xl font-mono font-bold text-emerald-400">${livePrice.toLocaleString()}</div>
-              <span className="text-[10px] text-amber-400 font-mono flex items-center justify-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                Macro Aligned
-              </span>
-            </div>
-          </div>
+          <button
+            onClick={() => setSubView('audit')}
+            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              subView === 'audit'
+                ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md shadow-amber-500/20'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>Audit Rilis Makroekonomi & AI Grounding</span>
+          </button>
         </div>
       </div>
 
-      {/* Main Grid: Calendar & Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {subView === 'calendar' ? (
+        <EconomicCalendarTab state={state} />
+      ) : (
+        <>
+          {/* Hero Header for Audit */}
+          <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-3 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-full text-xs font-mono font-bold flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                    QUANTITATIVE FUNDAMENTAL ANALYSIS ENGINE
+                  </span>
+                  <span className="px-2.5 py-1 bg-blue-500/15 text-blue-300 border border-blue-500/30 rounded-full text-[11px] font-mono flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-blue-400" />
+                    Data referensi makro per {latestDateLabel} — {events.length} rilis data tercatat
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  Analisis Makroekonomi & Kejutan Statistik
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                  Pusat audit rilis data tier-1 AS (FOMC, NFP, CPI, PPI). Mencegah look-ahead bias dengan verifikasi konsensus pra-rilis, perhitungan <em>Economic Surprise Z-score</em>, dan penjelasan AI berbasis dokumen resmi BLS/Federal Reserve.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-center shrink-0 space-y-1 w-full sm:w-auto">
+                  <span className="text-[10px] text-slate-400 font-mono uppercase">Spot Gold (XAU/USD)</span>
+                  <div className="text-xl font-mono font-bold text-emerald-400">${livePrice.toLocaleString()}</div>
+                  <span className="text-[10px] text-amber-400 font-mono flex items-center justify-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Macro Aligned
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Grid: Calendar & Inspector */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Left Column: Economic Calendar Events Table / List */}
         <div className="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl backdrop-blur-sm space-y-4">
@@ -442,6 +480,8 @@ export const FundamentalTab: React.FC<FundamentalTabProps> = ({ state }) => {
         </div>
 
       </div>
+      </>
+      )}
 
       {/* Interactive Modal: Add / Edit Macro Event */}
       {isModalOpen && (

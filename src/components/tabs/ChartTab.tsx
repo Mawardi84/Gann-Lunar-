@@ -5,6 +5,7 @@ import {
 import { MarketState } from '../../hooks/useMarketState';
 import { IndicatorStudySelector } from '../IndicatorStudySelector';
 import { PineScriptEditor } from '../PineScriptEditor';
+import { TimeframeSelectorBar } from '../TimeframeSelectorBar';
 
 interface ChartTabProps {
   state: MarketState;
@@ -21,6 +22,7 @@ export const ChartTab: React.FC<ChartTabProps> = ({ state }) => {
     handleSyncAllParametersFromChart,
     chartInterval,
     setChartInterval,
+    changeTimeframe,
     chartStyle,
     setChartStyle,
     chartTheme,
@@ -128,7 +130,7 @@ export const ChartTab: React.FC<ChartTabProps> = ({ state }) => {
               ].map(item => (
                 <button
                   key={item.val}
-                  onClick={() => setChartInterval(item.val)}
+                  onClick={() => changeTimeframe(item.val)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     chartInterval === item.val
                       ? 'bg-amber-500 text-slate-950 shadow-sm'
@@ -223,6 +225,9 @@ export const ChartTab: React.FC<ChartTabProps> = ({ state }) => {
           onToggleStudy={handleToggleStudy}
           onSelectPreset={handleSelectStudyPreset}
         />
+
+        {/* Dynamic Timeframe & Entry Zone Bar */}
+        <TimeframeSelectorBar state={state} title="Level Timeframe & Deteksi Area Entry" />
 
         {/* TradingView Embed Iframe Container */}
         <div className={`w-full bg-slate-950 rounded-xl border border-slate-800 overflow-hidden ${isChartFullscreen ? 'flex-1 min-h-[75vh]' : 'h-[600px]'}`}>
