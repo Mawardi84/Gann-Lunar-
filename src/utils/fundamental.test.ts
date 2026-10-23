@@ -67,8 +67,10 @@ test('INITIAL_MACRO_EVENTS contains accurately verified and estimated tier-1 mac
   // 8. Verified PPI September 2026 (Released October 2026)
   const ppiLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'ppi-2026-10');
   assert.ok(ppiLatest, 'Latest PPI event must exist');
-  assert.strictEqual(ppiLatest.actual_value, 0.5);
-  assert.strictEqual(ppiLatest.consensus_value, 0.3);
+  assert.strictEqual(ppiLatest.actual_value, 0.1);
+  assert.strictEqual(ppiLatest.consensus_value, 0.2);
+  assert.strictEqual(ppiLatest.previous_value, 0.2);
+  assert.strictEqual(ppiLatest.revised_previous, 0.2);
   assert.strictEqual(ppiLatest.data_status, 'VERIFIED');
 });
 
