@@ -10,11 +10,11 @@ export const BacktestTab: React.FC<BacktestTabProps> = ({ state }) => {
   const { backtestStats, assetName, currentAssetHistory, result, calculateGann } = state;
 
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl backdrop-blur-sm max-w-5xl mx-auto space-y-6">
+    <div className="bg-slate-900/80 border border-slate-800 rounded-md p-6 sm:p-8 shadow-xl backdrop-blur-sm max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+            <span className="p-2 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400">
               <History className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold text-white tracking-tight">
@@ -27,12 +27,12 @@ export const BacktestTab: React.FC<BacktestTabProps> = ({ state }) => {
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono">
-          <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300">
-            Buffer: <strong className="text-amber-400">{currentAssetHistory.length}</strong> titik data
+          <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-slate-300">
+            Buffer: <strong className="text-amber-400 tabular-nums">{currentAssetHistory.length}</strong> titik data
           </span>
           <button
             onClick={() => calculateGann(false)}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+            className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
             title="Refresh Kalkulasi"
           >
             <RefreshCw className="w-4 h-4" />
@@ -41,8 +41,8 @@ export const BacktestTab: React.FC<BacktestTabProps> = ({ state }) => {
       </div>
 
       {!backtestStats.hasEnoughData ? (
-        <div className="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-8 text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto animate-pulse">
+        <div className="bg-amber-950/20 border border-amber-500/30 rounded-md p-8 text-center space-y-3">
+          <div className="w-12 h-12 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto animate-pulse">
             <AlertCircle className="w-6 h-6" />
           </div>
           <h3 className="text-lg font-bold text-amber-300">Data Historis Belum Cukup</h3>
@@ -50,7 +50,7 @@ export const BacktestTab: React.FC<BacktestTabProps> = ({ state }) => {
             {backtestStats.message || 'Sistem sedang mengakumulasi buffer data time-series real-time (minimal 20 titik data). Simulasi sinyal akan muncul otomatis saat harga menyentuh level support S1 atau resisten R1 Gann.'}
           </p>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950/80 border border-slate-800 text-[11px] font-mono text-slate-400">
-            <span>Terkumpul: {currentAssetHistory.length} / 20 titik</span>
+            <span>Terkumpul: <strong className="tabular-nums">{currentAssetHistory.length}</strong> / 20 titik</span>
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
           </div>
         </div>
@@ -58,9 +58,9 @@ export const BacktestTab: React.FC<BacktestTabProps> = ({ state }) => {
         <div className="space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <div className="bg-slate-950 p-4 rounded-md border border-slate-800">
               <div className="text-xs text-slate-400">Win Rate</div>
-              <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
+              <div className="text-2xl font-black font-mono tabular-nums text-emerald-400 mt-1">
                 {backtestStats.winRate}%
               </div>
               <div className="text-[10px] text-slate-500 mt-0.5">Rasio Sukses Sinyal</div>

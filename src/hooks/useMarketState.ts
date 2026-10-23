@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { calculateGannLevels, calculateFibonacciLevels, evaluate4DOracle, OracleDecisionResult, GannLevels, FibonacciLevels } from '../utils/gann';
 import { calculateTechnicalIndicators, IndicatorMetrics } from '../utils/indicators';
 import { runGannBacktest, BacktestResult } from '../utils/backtest';
@@ -57,6 +57,7 @@ export interface WatchlistItem {
   isUp: boolean;
   factor: number;
   source?: 'live' | 'fallback';
+  flash?: 'up' | 'down' | null;
 }
 
 export interface JournalEntry {
@@ -143,6 +144,10 @@ export function useMarketState() {
   const [priceChange, setPriceChange] = useState<number>(-0.14);
   const [isPriceUp, setIsPriceUp] = useState<boolean>(false);
   const [priceSource, setPriceSource] = useState<'live' | 'fallback'>('fallback');
+  const [activePriceFlash, setActivePriceFlash] = useState<'up' | 'down' | null>(null);
+
+  // Price Flash tracking ref
+  const prevPricesRef = useRef<Record<string, number>>({});
 
   // Watchlist
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>(INITIAL_WATCHLIST);
@@ -279,7 +284,7 @@ export function useMarketState() {
 
         if (priceMap && isMounted) {
           const validPriceMap = priceMap;
-          // 1. Update watchlist
+          // 1. Update watchlist with flash animation triggers
           setWatchlist(prev => prev.map(item => {
             const liveData = validPriceMap[item.symbol];
             if (liveData) {
@@ -290,6 +295,15 @@ export function useMarketState() {
               const isUp = newPrice >= item.price;
               const src = liveData.source || 'live';
 
+              const prevPrice = prevPricesRef.current[item.symbol] ?? item.price;
+              let itemFlash: 'up' | 'down' | null = null;
+              if (newPrice > prevPrice) {
+                itemFlash = 'up';
+              } else if (newPrice < prevPrice) {
+                itemFlash = 'down';
+              }
+              prevPricesRef.current[item.symbol] = newPrice;
+
               if (assetName.includes(item.symbol)) {
                 setLivePrice(newPrice);
                 setLiveHigh(newHigh);
@@ -297,6 +311,10 @@ export function useMarketState() {
                 setPriceChange(newChange);
                 setIsPriceUp(isUp);
                 setPriceSource(src);
+                if (itemFlash) {
+                  setActivePriceFlash(itemFlash);
+                  setTimeout(() => setActivePriceFlash(null), 400);
+                }
 
                 if (autoSyncEnabled) {
                   setPivotInput(newPrice.toString());
@@ -305,6 +323,7 @@ export function useMarketState() {
                   setOracleSwingLow(tfLevels.low.toString());
                 }
               }
+
               return {
                 ...item,
                 price: newPrice,
@@ -313,6 +332,7 @@ export function useMarketState() {
                 change: newChange,
                 isUp,
                 source: src,
+                flash: itemFlash,
               };
             }
             return item;
@@ -755,6 +775,7 @@ ${oracleResult.decision === 'EXECUTE'
     priceChange,
     isPriceUp,
     priceSource,
+    activePriceFlash,
     watchlist,
     priceHistory,
     currentAssetHistory,

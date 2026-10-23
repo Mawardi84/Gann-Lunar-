@@ -496,8 +496,8 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
 
           {/* The 4 Neat Panel Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 font-mono text-xs">
-            {/* KARTU 1: Harga */}
-            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 hover:border-amber-500/50 transition-all space-y-3 relative overflow-hidden group">
+            {/* KARTU 1: Harga (Amber) */}
+            <div className="bg-slate-950 p-5 rounded-md border-y border-r border-slate-800 border-l-4 border-l-amber-500 hover:border-amber-500/80 transition-all space-y-3 relative overflow-hidden group">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
                 <div>
                   <span className="text-amber-400 font-extrabold text-sm block">1. Arsitektur Harga (Zona Konfluensi):</span>
@@ -508,18 +508,18 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
               <div className="text-slate-300 space-y-2 leading-relaxed">
                 <p>
                   <strong>Rumus Gann Square of 9:</strong> (√{priceVal} ± {currentTimeframeLevels?.recommendedFactor ?? 0.125})²<br />
-                  • Support S1 = <span className="text-emerald-400 font-bold">{gannVals.sup1.toFixed(2)}</span><br />
-                  • Resisten R1 = <span className="text-rose-400 font-bold">{gannVals.res1.toFixed(2)}</span>
+                  • Support S1 = <span className="text-emerald-400 font-bold tabular-nums">{gannVals.sup1.toFixed(2)}</span><br />
+                  • Resisten R1 = <span className="text-rose-400 font-bold tabular-nums">{gannVals.res1.toFixed(2)}</span>
                 </p>
                 <p>
                   <strong>Fibonacci Retracement (High {sHigh} ke Low {sLow} | Rentang: {(sHigh - sLow).toFixed(2)}):</strong><br />
-                  • Level 50.0% = <span className="text-indigo-300 font-bold">{fibVals.fib500.toFixed(2)}</span><br />
-                  • Level 61.8% (Golden Pocket) = <span className="text-purple-400 font-bold">{fibVals.fib618.toFixed(2)}</span>
+                  • Level 50.0% = <span className="text-indigo-300 font-bold tabular-nums">{fibVals.fib500.toFixed(2)}</span><br />
+                  • Level 61.8% (Golden Pocket) = <span className="text-purple-400 font-bold tabular-nums">{fibVals.fib618.toFixed(2)}</span>
                 </p>
                 <div className="pt-2 border-t border-slate-800/80 text-amber-300 space-y-1">
                   <div>
                     <strong>Titik Irisan Zona Konfluensi (Area Entry):</strong><br />
-                    <span className="text-sm font-bold text-white bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700 inline-block mt-1">
+                    <span className="text-sm font-bold text-white bg-slate-900 px-2.5 py-1 rounded border border-slate-700 inline-block mt-1 tabular-nums">
                       {confluenceZoneText}
                     </span>
                   </div>
@@ -530,8 +530,8 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
               </div>
             </div>
 
-            {/* KARTU 2: Waktu */}
-            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition-all space-y-3 relative overflow-hidden group">
+            {/* KARTU 2: Waktu (Indigo) */}
+            <div className="bg-slate-950 p-5 rounded-md border-y border-r border-slate-800 border-l-4 border-l-indigo-500 hover:border-indigo-500/80 transition-all space-y-3 relative overflow-hidden group">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
                 <span className="text-indigo-400 font-extrabold text-sm">2. Sinkronisasi Waktu (Filter Lunar):</span>
                 <Moon className="w-4 h-4 text-indigo-400" />
@@ -546,7 +546,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
                 <p>
                   <strong>Fase Lunar:</strong> {oracleLunarPhase}
                 </p>
-                <p className="text-slate-400 text-[11px] leading-relaxed pt-1">
+                <p className="text-slate-400 text-[11px] leading-relaxed pt-1 font-sans">
                   {oracleResult.isLunarValid 
                     ? 'Waktu saat ini berada di dalam jendela aktif H-2 hingga H+2 dari puncak fase bulan (Bulan Purnama/Bulan Baru). Gravitasi waktu selaras untuk memicu pembalikan arah pasar.' 
                     : 'Waktu saat ini berada di luar jendela aktif H-2 hingga H+2 fase bulan utama. Volatilitas siklikal netral/lemah.'}
@@ -554,23 +554,23 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
               </div>
             </div>
 
-            {/* KARTU 3: Ruang */}
-            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 hover:border-purple-500/50 transition-all space-y-3 relative overflow-hidden group">
+            {/* KARTU 3: Ruang (Cyan) */}
+            <div className="bg-slate-950 p-5 rounded-md border-y border-r border-slate-800 border-l-4 border-l-cyan-500 hover:border-cyan-500/80 transition-all space-y-3 relative overflow-hidden group">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-                <span className="text-purple-400 font-extrabold text-sm">3. Validasi Ruang (Momentum Vektor):</span>
-                <Compass className="w-4 h-4 text-purple-400" />
+                <span className="text-cyan-400 font-extrabold text-sm">3. Validasi Ruang (Momentum Vektor):</span>
+                <Compass className="w-4 h-4 text-cyan-400" />
               </div>
               <div className="text-slate-300 space-y-2 leading-relaxed">
                 <p>
-                  <strong>Sudut Tren Pythagoras:</strong> <span className="text-white font-bold">{angleNum}°</span>
+                  <strong>Sudut Tren Pythagoras:</strong> <span className="text-white font-bold tabular-nums">{angleNum}°</span>
                 </p>
                 <p>
                   <strong>Evaluasi Geometris:</strong>{' '}
-                  <span className={oracleResult.isSpaceHarmonic ? 'text-emerald-400 font-bold' : oracleResult.isSpaceExhausted ? 'text-rose-400 font-bold' : 'text-amber-400 font-bold'}>
+                  <span className={oracleResult.isSpaceHarmonic ? 'text-emerald-400 font-bold' : oracleResult.isSpaceExhausted ? 'text-rose-400 font-bold' : 'text-cyan-400 font-bold'}>
                     {oracleResult.isSpaceHarmonic ? 'Keseimbangan Harmonik (45°)' : oracleResult.isSpaceExhausted ? 'Kelelahan Tren (>70° Exhaustion)' : 'Momentum Sedang / Datar'}
                   </span>
                 </p>
-                <p className="text-slate-400 text-[11px] leading-relaxed pt-1">
+                <p className="text-slate-400 text-[11px] leading-relaxed pt-1 font-sans">
                   {oracleResult.isSpaceHarmonic
                     ? 'Sudut 45 derajat (Gann 1x1) merefleksikan keselarasan sempurna 1 unit harga per 1 unit waktu.'
                     : oracleResult.isSpaceExhausted
@@ -580,16 +580,16 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
               </div>
             </div>
 
-            {/* KARTU 4: Psikologi */}
-            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 hover:border-emerald-500/50 transition-all space-y-3 relative overflow-hidden group">
+            {/* KARTU 4: Psikologi (Fuchsia) */}
+            <div className="bg-slate-950 p-5 rounded-md border-y border-r border-slate-800 border-l-4 border-l-fuchsia-500 hover:border-fuchsia-500/80 transition-all space-y-3 relative overflow-hidden group">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-                <span className="text-emerald-400 font-extrabold text-sm">4. Konfirmasi Psikologi (Candlestick):</span>
-                <CandlestickChart className="w-4 h-4 text-emerald-400" />
+                <span className="text-fuchsia-400 font-extrabold text-sm">4. Konfirmasi Psikologi (Candlestick):</span>
+                <CandlestickChart className="w-4 h-4 text-fuchsia-400" />
               </div>
               <div className="text-slate-300 space-y-2 leading-relaxed">
                 <p>
                   <strong>Pola Homma Terpantau:</strong><br />
-                  <span className={oracleResult.isCandleConfirmed ? 'text-emerald-300 font-bold' : 'text-amber-300 font-bold'}>
+                  <span className={oracleResult.isCandleConfirmed ? 'text-fuchsia-300 font-bold' : 'text-amber-300 font-bold'}>
                     {oracleCandle}
                   </span>
                 </p>
@@ -599,7 +599,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
                     {oracleResult.isCandleConfirmed ? 'Terkonfirmasi Aktif' : 'Menunggu Reaksi'}
                   </span>
                 </p>
-                <p className="text-slate-400 text-[11px] leading-relaxed pt-1">
+                <p className="text-slate-400 text-[11px] leading-relaxed pt-1 font-sans">
                   {oracleResult.isCandleConfirmed
                     ? 'Pola lilin penolakan harga ajaran Munehisa Homma mengonfirmasi masuknya tekanan beli institusional pada zona harga kritis.'
                     : 'Belum terkonfirmasi adanya reaksi penolakan harga yang jelas pada Zona Konfluensi. Diperlukan kesabaran konfirmasi.'}

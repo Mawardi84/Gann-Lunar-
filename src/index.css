@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
 @keyframes marquee {
   0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
@@ -10,3 +14,33 @@
 .animate-marquee-slow {
   animation: marquee 60s linear infinite;
 }
+
+/* Trading Terminal Flash Animations for Price Updates */
+@keyframes flash-up {
+  0% { background-color: rgba(16, 185, 129, 0.35); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flash-down {
+  0% { background-color: rgba(244, 63, 94, 0.35); }
+  100% { background-color: transparent; }
+}
+
+.animate-flash-up {
+  animation: flash-up 400ms ease-out;
+}
+
+.animate-flash-down {
+  animation: flash-down 400ms ease-out;
+}
+
+/* Urgent Macro Event Border Pulse */
+@keyframes urgent-pulse {
+  0%, 100% { border-color: rgba(244, 63, 94, 0.4); }
+  50% { border-color: rgba(244, 63, 94, 1); }
+}
+
+.animate-urgent-pulse {
+  animation: urgent-pulse 1.5s infinite ease-in-out;
+}
+

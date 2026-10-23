@@ -344,12 +344,15 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
               const countdown = getEventCountdown(event.timestamp);
               const surprise = calculateSurprise(event.actual, event.forecast);
               const eventDate = new Date(event.timestamp);
+              const isImminent = countdown.urgency === 'IMMINENT';
 
               return (
                 <div
                   key={event.id}
                   onClick={() => handleOpenDetailModal(event)}
-                  className="group bg-slate-900/90 hover:bg-slate-800/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 shadow-lg transition-all cursor-pointer space-y-3 relative overflow-hidden"
+                  className={`group bg-slate-900/90 hover:bg-slate-800/80 border rounded-md p-4 shadow-lg transition-all cursor-pointer space-y-3 relative overflow-hidden ${
+                    isImminent ? 'border-2 border-rose-500 animate-urgent-pulse' : 'border-slate-800 hover:border-amber-500/50'
+                  }`}
                 >
                   {/* Card Header: Currency, Flag, Impact, Date */}
                   <div className="flex items-center justify-between">

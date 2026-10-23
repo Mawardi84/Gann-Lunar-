@@ -12,6 +12,8 @@ import {
 
 import { useMarketState } from './hooks/useMarketState';
 import { LandingPage } from './components/LandingPage';
+import { StatusBar } from './components/StatusBar';
+import { WatchlistRail } from './components/WatchlistRail';
 
 const OracleTab = lazy(() => import('./components/tabs/OracleTab').then(m => ({ default: m.OracleTab })));
 const DashboardTab = lazy(() => import('./components/tabs/DashboardTab').then(m => ({ default: m.DashboardTab })));
@@ -251,20 +253,26 @@ export default function App() {
             {/* Animasi running text */}
             <div className="flex overflow-hidden relative">
               <div className="flex items-center gap-12 animate-marquee-slow whitespace-nowrap">
-                {[...watchlist, ...watchlist].map((item, index) => (
-                  <div key={`${item.symbol}-${index}`} className="flex items-center gap-2">
-                    <span className="font-semibold text-white">{item.symbol}</span>
-                    <span className="text-slate-200">${item.price.toFixed(item.price > 100 ? 2 : 4)}</span>
-                    <span className={item.isUp ? 'text-emerald-400' : 'text-rose-400'}>
-                      {item.isUp ? '+' : ''}{item.change.toFixed(2)}%
-                    </span>
-                    {item.source === 'fallback' && (
-                      <span className="text-[8px] px-1 rounded bg-amber-500/20 text-amber-300 font-mono">
-                        FB
+                {[...watchlist, ...watchlist].map((item, index) => {
+                  let flashBg = '';
+                  if (item.flash === 'up') flashBg = 'animate-flash-up';
+                  if (item.flash === 'down') flashBg = 'animate-flash-down';
+
+                  return (
+                    <div key={`${item.symbol}-${index}`} className={`flex items-center gap-2 px-1.5 py-0.5 rounded ${flashBg}`}>
+                      <span className="font-semibold text-white font-mono">{item.symbol}</span>
+                      <span className="text-slate-200 font-mono tabular-nums">${item.price.toFixed(item.price > 100 ? 2 : 4)}</span>
+                      <span className={`font-mono tabular-nums ${item.isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {item.isUp ? '+' : ''}{item.change.toFixed(2)}%
                       </span>
-                    )}
-                  </div>
-                ))}
+                      {item.source === 'fallback' && (
+                        <span className="text-[8px] px-1 rounded bg-amber-500/20 text-amber-300 font-mono font-semibold">
+                          FB
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -433,6 +441,9 @@ export default function App() {
           <p className="text-slate-500 font-mono text-[11px]">© 2026 Gann-Lunar Architect. Presisi 4 Dimensi Pasar.</p>
         </div>
       </footer>
+
+      {/* Persistent Status Bar Fixed at Bottom */}
+      <StatusBar priceSource={priceSource} activeTab={activeTab} />
     </div>
   );
 }

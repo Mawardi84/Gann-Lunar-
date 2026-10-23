@@ -378,17 +378,17 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
           </div>
         )}
 
-        {/* 7. Pythagoras Space Vector Angle */}
+        {/* 7. Pythagoras Space Vector Angle (Cyan - Ruang) */}
         {(filter === 'all' || filter === 'ancient') && (
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition-all space-y-3">
+          <div className="bg-slate-950 p-4 rounded-md border border-slate-800 border-l-4 border-l-cyan-500 hover:border-cyan-500/80 transition-all space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-white flex items-center gap-1.5">
-                <Compass className="w-3.5 h-3.5 text-emerald-400" />
+                <Compass className="w-3.5 h-3.5 text-cyan-400" />
                 <span>Pythagoras (Ruang)</span>
               </span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+              <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono tabular-nums ${
                 metrics.pythagoras.angleDegrees >= 70 ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                metrics.pythagoras.angleDegrees >= 40 && metrics.pythagoras.angleDegrees <= 55 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                metrics.pythagoras.angleDegrees >= 40 && metrics.pythagoras.angleDegrees <= 55 ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' :
                 'bg-slate-800 text-slate-300'
               }`}>
                 {metrics.pythagoras.angleDegrees}° Vektor
@@ -396,7 +396,7 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
             </div>
 
             <div>
-              <div className="text-2xl font-black font-mono text-emerald-400">
+              <div className="text-2xl font-black font-mono tabular-nums text-cyan-400">
                 {metrics.pythagoras.angleDegrees}°
               </div>
               <p className="text-[10px] text-slate-400 mt-0.5">
@@ -404,24 +404,24 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
               </p>
             </div>
 
-            <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 flex items-center justify-between">
+            <div className="p-2 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-300 flex items-center justify-between font-mono">
               <span>Status Keseimbangan:</span>
-              <strong className={metrics.pythagoras.angleDegrees >= 70 ? 'text-rose-400' : 'text-emerald-400'}>
+              <strong className={metrics.pythagoras.angleDegrees >= 70 ? 'text-rose-400' : 'text-cyan-400'}>
                 {metrics.pythagoras.angleDegrees >= 70 ? 'Tren Lelah (Awas Reversal)' : 'Seimbang 1x1'}
               </strong>
             </div>
           </div>
         )}
 
-        {/* 8. Homma Candlestick Psychology */}
+        {/* 8. Homma Candlestick Psychology (Fuchsia - Psikologi) */}
         {(filter === 'all' || filter === 'psychology') && (
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition-all space-y-3">
+          <div className="bg-slate-950 p-4 rounded-md border border-slate-800 border-l-4 border-l-fuchsia-500 hover:border-fuchsia-500/80 transition-all space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-white flex items-center gap-1.5">
-                <Flame className="w-3.5 h-3.5 text-rose-400" />
+                <Flame className="w-3.5 h-3.5 text-fuchsia-400" />
                 <span>Homma Candlestick</span>
               </span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+              <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono ${
                 metrics.homma.patternType === 'Bullish Reversal' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                 metrics.homma.patternType === 'Bearish Reversal' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
                 'bg-slate-800 text-slate-300'
@@ -434,7 +434,7 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
               <div className="text-white font-bold text-xs truncate" title={metrics.homma.patternName}>
                 {metrics.homma.patternName}
               </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">
+              <div className="text-[10px] text-slate-400 mt-0.5 font-mono tabular-nums">
                 Tekanan Buyer: <strong className="text-emerald-400">{metrics.homma.bullPressurePct}%</strong> vs Seller: <strong className="text-rose-400">{metrics.homma.bearPressurePct}%</strong>
               </div>
             </div>
@@ -447,7 +447,7 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
                   style={{ width: `${metrics.homma.bullPressurePct}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+              <div className="flex justify-between text-[9px] text-slate-400 font-mono tabular-nums">
                 <span className="text-emerald-400 font-bold">Buyer {metrics.homma.bullPressurePct}%</span>
                 <span className="text-rose-400 font-bold">Seller {metrics.homma.bearPressurePct}%</span>
               </div>

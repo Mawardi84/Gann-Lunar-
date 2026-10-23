@@ -1,14 +1,15 @@
 import React from 'react';
 import { 
-  Star, Zap, Edit3, Calculator, RefreshCw, Target, TrendingUp, TrendingDown 
+  Zap, Edit3, Calculator, RefreshCw, Target, TrendingUp, TrendingDown 
 } from 'lucide-react';
 import { 
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine, Bar, Cell 
 } from 'recharts';
-import { MarketState, Candle, WatchlistItem } from '../../hooks/useMarketState';
+import { MarketState, Candle } from '../../hooks/useMarketState';
 import { IndicatorStudySelector } from '../IndicatorStudySelector';
 import { TechnicalIndicatorsPanel } from '../TechnicalIndicatorsPanel';
 import { TimeframeSelectorBar } from '../TimeframeSelectorBar';
+import { WatchlistRail } from '../WatchlistRail';
 
 interface DashboardTabProps {
   state: MarketState;
@@ -61,68 +62,21 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
     : '';
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      {/* Left Sidebar: Watchlist */}
-      <div className="lg:col-span-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl backdrop-blur-sm space-y-4 sticky top-24">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Watchlist (TradingView Feeds)</h3>
-          </div>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
-            priceSource === 'live'
-              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse'
-              : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-          }`}>
-            {priceSource === 'live' ? '● Live Feeds' : '● Fallback Data'}
-          </span>
-        </div>
-
-        <div className="space-y-2 max-h-[580px] overflow-y-auto pr-1">
-          {watchlist.map((item) => {
-            const isSelected = assetName.includes(item.symbol);
-            const isFallback = item.source === 'fallback';
-            return (
-              <div
-                key={item.symbol}
-                onClick={() => handleSelectWatchlistAsset(item)}
-                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${isSelected ? 'bg-amber-500/15 border-amber-500/60 shadow-md shadow-amber-500/10' : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/60'}`}
-              >
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-white">{item.symbol}</span>
-                    {isSelected && <span className="text-[9px] px-1.5 py-0.2 bg-amber-500 text-slate-950 font-bold rounded">Active</span>}
-                    {isFallback ? (
-                      <span className="text-[8px] px-1.5 py-0.2 bg-amber-500/15 text-amber-300 border border-amber-500/30 rounded font-mono font-semibold" title="Data fallback offline">
-                        FB
-                      </span>
-                    ) : (
-                      <span className="text-[8px] px-1.5 py-0.2 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded font-mono font-semibold">
-                        LIVE
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[10px] text-slate-400 truncate max-w-[120px]">{item.name}</div>
-                </div>
-
-                <div className="text-right font-mono">
-                  <div className={`text-xs font-bold transition-colors duration-300 ${item.isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {item.price.toLocaleString()}
-                  </div>
-                  <div className={`text-[10px] font-semibold ${item.change >= 0 ? 'text-emerald-400/90' : 'text-rose-400/90'}`}>
-                    {item.change >= 0 ? `+${item.change}%` : `${item.change}%`}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Left Sidebar: WatchlistRail */}
+      <div className="lg:col-span-4 sticky top-24">
+        <WatchlistRail
+          watchlist={watchlist}
+          assetName={assetName}
+          priceSource={priceSource}
+          onSelectAsset={handleSelectWatchlistAsset}
+        />
       </div>
 
       {/* Right Main Column */}
-      <div className="lg:col-span-8 space-y-8">
+      <div className="lg:col-span-8 space-y-6">
         {/* Top Section: TradingView Widget Iframe */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-4">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-md p-5 shadow-xl backdrop-blur-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>

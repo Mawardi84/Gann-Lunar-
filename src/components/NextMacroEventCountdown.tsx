@@ -79,7 +79,9 @@ export const NextMacroEventCountdown: React.FC<NextMacroEventCountdownProps> = (
   const wibString = wibDate.toISOString().substring(11, 19) + ' WIB';
 
   return (
-    <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-amber-500/30 rounded-3xl p-5 sm:p-7 shadow-2xl relative overflow-hidden">
+    <div className={`bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border rounded-md p-5 sm:p-7 shadow-2xl relative overflow-hidden transition-all ${
+      countdown.urgency === 'IMMINENT' ? 'border-2 border-rose-500 animate-urgent-pulse' : 'border-amber-500/30'
+    }`}>
       {/* Background ambient glow */}
       <div className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 ${
         countdown.urgency === 'IMMINENT' ? 'bg-rose-500/15' : 'bg-amber-500/10'
