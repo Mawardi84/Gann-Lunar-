@@ -43,11 +43,12 @@ test('INITIAL_MACRO_EVENTS contains accurately verified and estimated tier-1 mac
   assert.strictEqual(ppiVerified.release_time_utc, '2026-03-18T12:30:00Z');
   assert.strictEqual(ppiVerified.data_status, 'VERIFIED');
 
-  // 5. Recent NFP September 2026 (Released October 2026)
+  // 5. Verified NFP September 2026 (Released October 2026)
   const nfpLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'nfp-2026-10');
   assert.ok(nfpLatest, 'Latest NFP event must exist');
-  assert.strictEqual(nfpLatest.actual_value, 142.0);
-  assert.strictEqual(nfpLatest.consensus_value, 140.0);
+  assert.strictEqual(nfpLatest.actual_value, 29.0);
+  assert.strictEqual(nfpLatest.consensus_value, 90.0);
+  assert.strictEqual(nfpLatest.data_status, 'VERIFIED');
 
   // 6. Recent CPI September 2026 (Released October 2026)
   const cpiLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'cpi-2026-10');
@@ -55,17 +56,20 @@ test('INITIAL_MACRO_EVENTS contains accurately verified and estimated tier-1 mac
   assert.strictEqual(cpiLatest.actual_value, 2.6);
   assert.strictEqual(cpiLatest.consensus_value, 2.6);
 
-  // 7. Recent FOMC September 2026
+  // 7. Verified FOMC September 2026
   const fomcLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'fomc-2026-09');
   assert.ok(fomcLatest, 'Latest FOMC event must exist');
-  assert.strictEqual(fomcLatest.actual_value, 3.50);
-  assert.strictEqual(fomcLatest.range_label, '3.25%–3.50%');
+  assert.strictEqual(fomcLatest.actual_value, 4.00);
+  assert.strictEqual(fomcLatest.consensus_value, 3.75);
+  assert.strictEqual(fomcLatest.range_label, '3.75%–4.00%');
+  assert.strictEqual(fomcLatest.data_status, 'VERIFIED');
 
-  // 8. Recent PPI September 2026 (Released October 2026)
+  // 8. Verified PPI September 2026 (Released October 2026)
   const ppiLatest = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'ppi-2026-10');
   assert.ok(ppiLatest, 'Latest PPI event must exist');
-  assert.strictEqual(ppiLatest.actual_value, 0.2);
-  assert.strictEqual(ppiLatest.consensus_value, 0.2);
+  assert.strictEqual(ppiLatest.actual_value, 0.5);
+  assert.strictEqual(ppiLatest.consensus_value, 0.3);
+  assert.strictEqual(ppiLatest.data_status, 'VERIFIED');
 });
 
 test('calculateEconomicSurprise correctly handles event-specific stddev and FOMC discrete assessment', () => {

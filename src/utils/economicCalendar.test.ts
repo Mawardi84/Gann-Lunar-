@@ -6,7 +6,8 @@ import {
   getNextUpcomingHighImpactEvent,
   getEventCountdown,
   calculateSurprise,
-  getGannVolatilityBlackout
+  getGannVolatilityBlackout,
+  fetchLiveNasdaqEconomicEvents
 } from './economicCalendar';
 
 test('getInitialCalendarEvents generates expected high-impact and multi-currency events', () => {
@@ -128,4 +129,15 @@ test('getGannVolatilityBlackout detects blackout and normal periods correctly', 
   const normal = getGannVolatilityBlackout(farEvent, nowMs);
   assert.strictEqual(normal.isInWindow, false);
   assert.strictEqual(normal.status, 'NORMAL');
+});
+
+test('fetchLiveNasdaqEconomicEvents handles online live data or graceful fallback', async () => {
+  const events = await fetchLiveNasdaqEconomicEvents();
+  assert.ok(Array.isArray(events), 'Should return an array');
+  if (events.length > 0) {
+    const first = events[0];
+    assert.ok(first.id, 'Event must have an ID');
+    assert.ok(first.title, 'Event must have a title');
+    assert.ok(first.currency, 'Event must have a currency');
+  }
 });

@@ -561,3 +561,138 @@ export function getGannVolatilityBlackout(
     recommendation: 'Kondisi Likuiditas Normal. Eksekusi sesuai matriks konfluensi Gann & Fibonacci.'
   };
 }
+
+/**
+ * Helper to map country names to ISO currency codes and flags
+ */
+const COUNTRY_CURRENCY_MAP: Record<string, { currency: EconomicCurrency; flag: string }> = {
+  'United States': { currency: 'USD', flag: '🇺🇸' },
+  'US': { currency: 'USD', flag: '🇺🇸' },
+  'Euro Zone': { currency: 'EUR', flag: '🇪🇺' },
+  'Germany': { currency: 'EUR', flag: '🇩🇪' },
+  'France': { currency: 'EUR', flag: '🇫🇷' },
+  'Japan': { currency: 'JPY', flag: '🇯🇵' },
+  'United Kingdom': { currency: 'GBP', flag: '🇬🇧' },
+  'UK': { currency: 'GBP', flag: '🇬🇧' },
+  'Indonesia': { currency: 'IDR', flag: '🇮🇩' },
+  'Australia': { currency: 'AUD', flag: '🇦🇺' },
+  'China': { currency: 'CNY', flag: '🇨🇳' },
+  'Canada': { currency: 'CAD', flag: '🇨🇦' },
+  'Switzerland': { currency: 'CHF', flag: '🇨🇭' },
+};
+
+/**
+ * Determine impact level based on event title keywords
+ */
+function classifyEventImpact(title: string): EconomicImpact {
+  const upper = title.toUpperCase();
+  if (
+    upper.includes('FOMC') || 
+    upper.includes('RATE DECISION') || 
+    upper.includes('INTEREST RATE') || 
+    upper.includes('NON-FARM') || 
+    upper.includes('PAYROLLS') || 
+    upper.includes('NFP') || 
+    upper.includes('CPI') || 
+    upper.includes('INFLATION') || 
+    upper.includes('GDP') || 
+    upper.includes('JOBLESS CLAIMS') || 
+    upper.includes('RETAIL SALES') || 
+    upper.includes('PMI') || 
+    upper.includes('BI-RATE')
+  ) {
+    return 'HIGH';
+  }
+  if (
+    upper.includes('SPEAKS') || 
+    upper.includes('CONFIDENCE') || 
+    upper.includes('MORTGAGE') || 
+    upper.includes('TRADE BALANCE') || 
+    upper.includes('UNEMPLOYMENT') || 
+    upper.includes('SENTIMENT')
+  ) {
+    return 'MEDIUM';
+  }
+  return 'LOW';
+}
+
+function cleanHtmlText(raw: string | null | undefined): string {
+  if (!raw) return '';
+  return raw
+    .replace(/&lt;br\s*\/*&gt;/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, '')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Fetch Live Economic Calendar Data directly from NASDAQ Live Feed API
+ */
+export async function fetchLiveNasdaqEconomicEvents(targetDateStr?: string): Promise<EconomicCalendarEvent[]> {
+  try {
+    const today = targetDateStr || new Date().toISOString().split('T')[0];
+    const url = `https://api.nasdaq.com/api/calendar/economicevents?date=${today}`;
+    
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json, text/plain, */*'
+      }
+    });
+
+    if (!res.ok) {
+      console.warn('NASDAQ Economic API returned non-OK status:', res.status);
+      return [];
+    }
+
+    const json = await res.json();
+    const rows = json?.data?.rows;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return [];
+    }
+
+    const parsedEvents: EconomicCalendarEvent[] = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const countryInfo = COUNTRY_CURRENCY_MAP[row.country] || { currency: 'USD', flag: '🌐' };
+      const impact = classifyEventImpact(row.eventName || '');
+
+      const actVal = cleanHtmlText(row.actual);
+      const conVal = cleanHtmlText(row.consensus);
+      const prevVal = cleanHtmlText(row.previous);
+
+      // Construct timestamp
+      const gmtTime = row.gmt || '12:00';
+      const isoTimestamp = `${today}T${gmtTime}:00Z`;
+
+      parsedEvents.push({
+        id: `nasdaq-${today}-${i}-${row.country?.toLowerCase().replace(/\s+/g, '-')}`,
+        title: cleanHtmlText(row.eventName),
+        currency: countryInfo.currency,
+        country: row.country || 'Global',
+        flag: countryInfo.flag,
+        timestamp: isoTimestamp,
+        impact,
+        actual: actVal && actVal !== '' ? actVal : null,
+        forecast: conVal && conVal !== '' ? conVal : null,
+        previous: prevVal && prevVal !== '' ? prevVal : null,
+        unit: actVal.includes('%') || conVal.includes('%') ? '%' : (actVal.includes('K') || conVal.includes('K') ? 'K' : ''),
+        period: 'Live Bursa',
+        description: cleanHtmlText(row.description) || 'Laporan rilis data makroekonomi resmi publikasi bursa global.',
+        sourceAgency: `NASDAQ Market Intelligence (${row.country})`,
+        gannImpactNotes: impact === 'HIGH' 
+          ? 'Rilis berpotensi tinggi memicu pengujian sudut 90°/180° Gann Square of 9.' 
+          : 'Volatilitas lokal terukur pada siklus harian.',
+        historicalVolatilityPips: impact === 'HIGH' ? 120 : 45
+      });
+    }
+
+    return parsedEvents;
+  } catch (err) {
+    console.warn('Failed to fetch live NASDAQ economic events:', err);
+    return [];
+  }
+}

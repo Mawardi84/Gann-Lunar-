@@ -11,6 +11,7 @@ import {
   getNextUpcomingHighImpactEvent, 
   getEventCountdown, 
   calculateSurprise, 
+  fetchLiveNasdaqEconomicEvents,
   EconomicCalendarEvent, 
   EconomicCurrency, 
   EconomicImpact, 
@@ -39,8 +40,38 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
   const [modalEvent, setModalEvent] = useState<EconomicCalendarEvent | null>(null);
   const [simulatedActual, setSimulatedActual] = useState<string>('');
 
-  // All economic events with relative timestamps
-  const [events] = useState<EconomicCalendarEvent[]>(() => getInitialCalendarEvents());
+  // All economic events with relative timestamps and live NASDAQ integration
+  const [events, setEvents] = useState<EconomicCalendarEvent[]>(() => getInitialCalendarEvents());
+  const [isLiveFetching, setIsLiveFetching] = useState<boolean>(false);
+
+  // Fetch real live economic events from NASDAQ endpoint
+  const handleFetchLiveEvents = async () => {
+    setIsLiveFetching(true);
+    try {
+      const liveData = await fetchLiveNasdaqEconomicEvents();
+      if (liveData.length > 0) {
+        setEvents(prev => {
+          const combined = [...liveData, ...prev];
+          const uniqueMap = new Map<string, EconomicCalendarEvent>();
+          for (const item of combined) {
+            const key = `${item.title.toLowerCase()}-${item.timestamp.substring(0, 10)}`;
+            if (!uniqueMap.has(key)) {
+              uniqueMap.set(key, item);
+            }
+          }
+          return Array.from(uniqueMap.values());
+        });
+      }
+    } catch (e) {
+      console.warn('Live events fetch error:', e);
+    } finally {
+      setIsLiveFetching(false);
+    }
+  };
+
+  React.useEffect(() => {
+    handleFetchLiveEvents();
+  }, []);
 
   // Filtered events
   const filterOptions: CalendarFilterOptions = useMemo(() => ({
@@ -91,6 +122,15 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 Live Event Streaming Aktif
               </span>
+              <button
+                onClick={handleFetchLiveEvents}
+                disabled={isLiveFetching}
+                className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 rounded-full text-[11px] font-mono flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                title="Muat ulang data live rilis bursa NASDAQ global"
+              >
+                <RefreshCw className={`w-3 h-3 text-emerald-400 ${isLiveFetching ? 'animate-spin' : ''}`} />
+                <span>{isLiveFetching ? 'Menyinkronkan...' : 'Refresh Live Bursa'}</span>
+              </button>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Kalender Ekonomi Real-Time & Volatilitas Pasar
