@@ -117,74 +117,64 @@ interface MarketPriceItem {
 app.get('/api/market/live-prices', async (req, res) => {
   try {
     const prices: Record<string, MarketPriceItem> = {
-      'XAU/USD': { price: 4146.80, high: 4180.00, low: 4120.00, change: -0.14, source: 'fallback' },
-      'XAG/USD': { price: 57.60, high: 58.20, low: 56.90, change: +0.45, source: 'fallback' },
-      'BTC/USD': { price: 82250.00, high: 83150.00, low: 81200.00, change: -0.32, source: 'fallback' },
-      'ETH/USD': { price: 2420.00, high: 2480.00, low: 2390.00, change: -1.09, source: 'fallback' },
-      'SOL/USD': { price: 104.50, high: 108.00, low: 102.50, change: -1.55, source: 'fallback' },
-      'BNB/USD': { price: 618.00, high: 628.00, low: 610.00, change: +0.82, source: 'fallback' },
-      'XRP/USD': { price: 2.38, high: 2.45, low: 2.29, change: +2.10, source: 'fallback' },
-      'EUR/USD': { price: 1.1218, high: 1.1250, low: 1.1190, change: +0.07, source: 'fallback' },
-      'GBP/USD': { price: 1.3314, high: 1.3360, low: 1.3270, change: +0.29, source: 'fallback' },
-      'USD/JPY': { price: 158.40, high: 159.10, low: 157.90, change: -0.18, source: 'fallback' },
-      'AUD/USD': { price: 0.6980, high: 0.7020, low: 0.6950, change: +0.15, source: 'fallback' },
-      'S&P 500': { price: 7657.01, high: 7756.84, low: 7651.91, change: -1.12, source: 'fallback' },
-      'NASDAQ': { price: 20450.80, high: 20680.00, low: 20390.10, change: -0.75, source: 'fallback' },
-      'DOW JONES': { price: 43210.50, high: 43500.00, low: 43100.00, change: +0.34, source: 'fallback' },
-      'OIL/USD': { price: 98.57, high: 99.00, low: 95.29, change: +0.61, source: 'fallback' },
-      'GAS/USD': { price: 2.85, high: 2.92, low: 2.78, change: -1.20, source: 'fallback' },
-      'AAPL': { price: 235.60, high: 238.20, low: 234.10, change: +1.15, source: 'fallback' },
-      'TSLA': { price: 242.80, high: 248.50, low: 239.00, change: -2.30, source: 'fallback' },
-      'NVDA': { price: 138.45, high: 141.20, low: 137.00, change: +2.45, source: 'fallback' },
+      'XAU/USD': { price: 2735.50, high: 2750.00, low: 2720.00, change: 0.15, source: 'fallback' },
+      'XAG/USD': { price: 33.80, high: 34.50, low: 33.20, change: 0.25, source: 'fallback' },
+      'BTC/USD': { price: 67500.00, high: 68200.00, low: 66800.00, change: 0.50, source: 'fallback' },
+      'ETH/USD': { price: 2550.00, high: 2600.00, low: 2510.00, change: -0.20, source: 'fallback' },
+      'SOL/USD': { price: 175.00, high: 180.00, low: 172.00, change: 1.10, source: 'fallback' },
+      'BNB/USD': { price: 605.00, high: 615.00, low: 600.00, change: 0.10, source: 'fallback' },
+      'XRP/USD': { price: 0.52, high: 0.54, low: 0.51, change: -0.50, source: 'fallback' },
+      'EUR/USD': { price: 1.0850, high: 1.0900, low: 1.0820, change: 0.05, source: 'fallback' },
+      'GBP/USD': { price: 1.3050, high: 1.3100, low: 1.3020, change: 0.08, source: 'fallback' },
+      'USD/JPY': { price: 151.80, high: 152.50, low: 151.20, change: -0.30, source: 'fallback' },
+      'AUD/USD': { price: 0.6650, high: 0.6700, low: 0.6620, change: -0.10, source: 'fallback' },
+      'S&P 500': { price: 5850.00, high: 5875.00, low: 5830.00, change: 0.20, source: 'fallback' },
+      'NASDAQ': { price: 20500.00, high: 20600.00, low: 20400.00, change: 0.40, source: 'fallback' },
+      'DOW JONES': { price: 43000.00, high: 43200.00, low: 42900.00, change: 0.10, source: 'fallback' },
+      'OIL/USD': { price: 71.50, high: 73.00, low: 70.00, change: 1.20, source: 'fallback' },
+      'GAS/USD': { price: 2.30, high: 2.40, low: 2.25, change: -1.50, source: 'fallback' },
+      'AAPL': { price: 232.00, high: 235.00, low: 230.00, change: 0.30, source: 'fallback' },
+      'TSLA': { price: 218.00, high: 225.00, low: 215.00, change: -1.20, source: 'fallback' },
+      'NVDA': { price: 140.00, high: 143.00, low: 138.00, change: 0.80, source: 'fallback' },
     };
 
-    // 1. Fetch live gold & silver
+    // 1. Fetch live gold
     try {
       const gRes = await fetch('https://api.gold-api.com/price/XAU', { signal: AbortSignal.timeout(3000) });
       if (gRes.ok) {
         const gData = await gRes.json();
         if (typeof gData?.price === 'number') {
           const p = Number(gData.price.toFixed(2));
-          prices['XAU/USD'] = {
-            price: p,
-            high: Number((p * 1.008).toFixed(2)),
-            low: Number((p * 0.992).toFixed(2)),
-            change: -0.14,
-            source: 'live'
-          };
+          prices['XAU/USD'] = { price: p, high: Number((p * 1.008).toFixed(2)), low: Number((p * 0.992).toFixed(2)), change: -0.14, source: 'live' };
         }
+      } else {
+        console.error('Gold API error:', gRes.status, await gRes.text());
       }
-    } catch {}
+    } catch (e) {
+      console.error('Gold API fetch failed:', e);
+    }
 
-    // 2. Fetch live crypto from Binance
+    // 2. Fetch live crypto
     try {
       const cryptoSymbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT'];
       const cRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(cryptoSymbols))}`, { signal: AbortSignal.timeout(3000) });
       if (cRes.ok) {
         const list = await cRes.json();
-        const map: Record<string, string> = {
-          'BTCUSDT': 'BTC/USD',
-          'ETHUSDT': 'ETH/USD',
-          'SOLUSDT': 'SOL/USD',
-          'BNBUSDT': 'BNB/USD',
-          'XRPUSDT': 'XRP/USD',
-        };
+        const map: Record<string, string> = { 'BTCUSDT': 'BTC/USD', 'ETHUSDT': 'ETH/USD', 'SOLUSDT': 'SOL/USD', 'BNBUSDT': 'BNB/USD', 'XRPUSDT': 'XRP/USD' };
         for (const item of list) {
           const key = map[item.symbol];
           if (key) {
-            prices[key] = {
-              price: parseFloat(item.lastPrice),
-              high: parseFloat(item.highPrice),
-              low: parseFloat(item.lowPrice),
-              change: parseFloat(parseFloat(item.priceChangePercent).toFixed(2)),
-              source: 'live',
-            };
+            prices[key] = { price: parseFloat(item.lastPrice), high: parseFloat(item.highPrice), low: parseFloat(item.lowPrice), change: parseFloat(parseFloat(item.priceChangePercent).toFixed(2)), source: 'live' };
           }
         }
+      } else {
+        console.error('Binance API error:', cRes.status, await cRes.text());
       }
-    } catch {}
+    } catch (e) {
+      console.error('Binance API fetch failed:', e);
+    }
 
-    // 3. Fetch live forex rates
+    // 3. Fetch live forex
     try {
       const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(3000) });
       if (fxRes.ok) {
@@ -206,8 +196,12 @@ app.get('/api/market/live-prices', async (req, res) => {
           const p = Number((1 / rates.AUD).toFixed(4));
           prices['AUD/USD'] = { price: p, high: Number((p * 1.004).toFixed(4)), low: Number((p * 0.996).toFixed(4)), change: 0.22, source: 'live' };
         }
+      } else {
+        console.error('Forex API error:', fxRes.status, await fxRes.text());
       }
-    } catch {}
+    } catch (e) {
+      console.error('Forex API fetch failed:', e);
+    }
 
     res.json({ prices });
   } catch (err: unknown) {
