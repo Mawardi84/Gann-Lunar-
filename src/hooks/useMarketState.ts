@@ -267,29 +267,35 @@ export function useMarketState() {
     const fetchLivePrices = async () => {
       try {
         let priceMap: Record<string, { price: number; high: number; low: number; change: number; source?: 'live' | 'fallback' }> | null = null;
+        let backendFailed = false;
 
         // Step 1: Attempt to query backend endpoint
         try {
+          console.log('Fetching live prices from backend...');
           const res = await fetch('/api/market/live-prices');
           if (res.ok) {
-            const text = await res.text();
-            if (text && text.trim().startsWith('{')) {
-              const data = JSON.parse(text);
-              if (data && data.prices) {
-                priceMap = data.prices;
-              }
+            const data = await res.json();
+            if (data && data.prices) {
+              priceMap = data.prices;
+              console.log('Backend live prices received:', priceMap);
             }
+          } else {
+            console.error('Backend API returned error:', res.status, await res.text());
+            backendFailed = true;
           }
-        } catch {
-          // Backend offline or static Vercel host
+        } catch (e) {
+          console.error('Backend API fetch failed:', e);
+          backendFailed = true;
         }
 
         // Step 2: Fallback to direct client-side open market feeds if backend fails or returns fallback
-        if (!priceMap || !priceMap['XAU/USD'] || priceMap['XAU/USD'].source === 'fallback') {
+        if (!priceMap || Object.values(priceMap).every(p => p.source === 'fallback')) {
+          console.log('Backend failed or returned stale data. Fetching direct market feeds...');
           try {
             const direct = await fetchDirectLiveMarketPrices();
             if (Object.keys(direct).length > 0) {
               priceMap = { ...(priceMap || {}), ...direct };
+              console.log('Direct market prices received:', priceMap);
             }
           } catch (e) {
             console.warn('Direct live market feed error:', e);
