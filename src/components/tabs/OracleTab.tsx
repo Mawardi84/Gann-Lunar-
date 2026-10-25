@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   ShieldCheck, Activity, Zap, CandlestickChart, Edit3, Moon, Compass, Target, 
-  Sparkles, Check, Copy, BookOpen 
+  Sparkles, Check, Copy, BookOpen, RefreshCw 
 } from 'lucide-react';
 import { 
   ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine, Bar, Cell, Line 
@@ -76,6 +76,11 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
     chartTheme,
     chartTimezone,
     showSideToolbar,
+    lunarPhaseResult,
+    priceAngleResult,
+    candlestickPatternResult,
+    recalculateOracleDimensions,
+    loading,
   } = state;
 
   const studiesParam = selectedStudies.length > 0
@@ -375,59 +380,123 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
             <p className="text-[11px] text-slate-400 mt-2 font-mono">Titik akhir ayunan gelombang TF {currentTimeframeLevels?.label ?? 'D'}</p>
           </div>
 
-          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800">
-            <label className="block text-slate-300 font-semibold mb-2 flex items-center gap-1.5">
-              <Moon className="w-4 h-4 text-indigo-400" />
-              <span>Lunar Phase (Dimensi Waktu)</span>
-            </label>
-            <select
-              value={oracleLunarPhase}
-              onChange={(e) => setOracleLunarPhase(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-indigo-500 cursor-pointer text-xs"
-            >
-              <option value="Full Moon (H-1) - Jendela Volatilitas Tinggi">Bulan Purnama (Full Moon ±2 Hari) [Valid]</option>
-              <option value="New Moon (H+1) - Jendela Volatilitas Tinggi">Bulan Baru (New Moon ±2 Hari) [Valid]</option>
-              <option value="Waxing Gibbous (Fase Normal)">Waxing Gibbous (Fase Normal) [Tidak Valid]</option>
-              <option value="Waning Crescent (Fase Normal)">Waning Crescent (Fase Normal) [Tidak Valid]</option>
-            </select>
-            <p className="text-[11px] text-indigo-400/90 mt-2 font-mono">Jendela aktif: H-2 s/d H+2 dari puncak fase</p>
+          {/* Automated Dimensi Waktu: Lunar Phase */}
+          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-slate-300 font-semibold flex items-center gap-1.5 text-xs">
+                <Moon className="w-4 h-4 text-indigo-400" />
+                <span>Lunar Phase (Dimensi Waktu - Otomatis)</span>
+              </label>
+              <button
+                onClick={recalculateOracleDimensions}
+                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                title="Refresh Manual Kalkulasi Waktu"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Refresh</span>
+              </button>
+            </div>
+            <div className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs space-y-1.5">
+              <div className="font-mono font-bold text-indigo-300 text-xs truncate">
+                {lunarPhaseResult ? lunarPhaseResult.oracleLabel : (loading || !priceVal ? 'Menghitung...' : oracleLunarPhase)}
+              </div>
+              {lunarPhaseResult && (
+                <div className="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
+                  <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold flex items-center gap-1">
+                    <span>🌕</span>
+                    <span>{Math.round(lunarPhaseResult.illumination * 100)}% Illumination</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
+                    {lunarPhaseResult.phaseLabel}
+                  </span>
+                </div>
+              )}
+            </div>
+            <p className="text-[11px] text-indigo-400/90 font-mono">
+              {lunarPhaseResult 
+                ? `Umur Bulan: ${lunarPhaseResult.age.toFixed(1)} hr | Full Moon: ${lunarPhaseResult.daysToFullMoon.toFixed(1)} hr lagi`
+                : 'Jendela aktif: H-2 s/d H+2 dari puncak fase'}
+            </p>
           </div>
 
-          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800">
-            <label className="block text-slate-300 font-semibold mb-2 flex items-center gap-1.5">
-              <CandlestickChart className="w-4 h-4 text-emerald-400" />
-              <span>Candlestick Pattern (Psikologi Homma)</span>
-            </label>
-            <select
-              value={oracleCandle}
-              onChange={(e) => setOracleCandle(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-emerald-500 cursor-pointer text-xs"
-            >
-              <option value="Bullish Pin Bar / Hammer (Rejection)">Bullish Pin Bar / Hammer (Rejection Bawah)</option>
-              <option value="Bullish Engulfing (Reversal Kuat)">Bullish Engulfing (Reversal Pembeli)</option>
-              <option value="Bearish Engulfing / Shooting Star">Bearish Engulfing / Shooting Star (Rejection Atas)</option>
-              <option value="Doji / Spinning Top (Indecision)">Doji / Spinning Top (Ragu-ragu / Tanpa Konfirmasi)</option>
-              <option value="Belum Ada Pola Konfirmasi">Belum Ada Pola Konfirmasi (No Pattern)</option>
-            </select>
-            <p className="text-[11px] text-emerald-400/90 mt-2 font-mono">Ajaran visual Munehisa Homma</p>
+          {/* Automated Dimensi Psikologi: Candlestick Pattern */}
+          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-slate-300 font-semibold flex items-center gap-1.5 text-xs">
+                <CandlestickChart className="w-4 h-4 text-emerald-400" />
+                <span>Candlestick Pattern (Psikologi Homma - Otomatis)</span>
+              </label>
+              <button
+                onClick={recalculateOracleDimensions}
+                className="text-[10px] text-emerald-400 hover:text-emerald-300 font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                title="Refresh Manual Deteksi Candlestick"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Refresh</span>
+              </button>
+            </div>
+            <div className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs space-y-1.5">
+              <div className="font-mono font-bold text-emerald-300 text-xs truncate">
+                {candlestickPatternResult ? candlestickPatternResult.patternLabel : (loading || !priceVal ? 'Menghitung...' : oracleCandle)}
+              </div>
+              {candlestickPatternResult && (
+                <div className="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
+                  <span className={`px-2 py-0.5 rounded border font-bold ${
+                    candlestickPatternResult.bias === 'Bullish'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                      : candlestickPatternResult.bias === 'Bearish'
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                      : 'bg-slate-800 text-slate-300 border-slate-700'
+                  }`}>
+                    {candlestickPatternResult.bias}
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
+                    {candlestickPatternResult.confidenceLabel}
+                  </span>
+                </div>
+              )}
+            </div>
+            <p className="text-[10px] text-amber-400/90 font-mono leading-tight">
+              ⚠️ {candlestickPatternResult ? candlestickPatternResult.disclaimer : 'Estimasi berbasis posisi harga relatif terhadap level Gann, bukan data OHLC asli.'}
+            </p>
           </div>
 
-          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800">
-            <label className="block text-slate-300 font-semibold mb-2 flex items-center gap-1.5">
-              <Compass className="w-4 h-4 text-amber-400" />
-              <span>Sudut Vektor Pythagoras (Dimensi Ruang)</span>
-            </label>
-            <select
-              value={oracleAngle}
-              onChange={(e) => setOracleAngle(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-amber-500 cursor-pointer text-xs"
-            >
-              <option value="45">45° (Gann 1x1 - Keseimbangan Harmonik Sempurna)</option>
-              <option value="75">75° (Sudut Curam - Kelelahan Tren / Exhaustion)</option>
-              <option value="60">60° (Momentum Cepat Vektor 2x1)</option>
-              <option value="25">25° (Momentum Lemah / Fluktuasi Mendatar)</option>
-            </select>
-            <p className="text-[11px] text-amber-400/90 mt-2 font-mono">Sudut &gt;70° kelelahan; 45° seimbang</p>
+          {/* Automated Dimensi Ruang: Sudut Pythagoras */}
+          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-slate-300 font-semibold flex items-center gap-1.5 text-xs">
+                <Compass className="w-4 h-4 text-amber-400" />
+                <span>Sudut Vektor Pythagoras (Dimensi Ruang - Otomatis)</span>
+              </label>
+              <button
+                onClick={recalculateOracleDimensions}
+                className="text-[10px] text-amber-400 hover:text-amber-300 font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                title="Refresh Manual Kalkulasi Sudut"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Refresh</span>
+              </button>
+            </div>
+            <div className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs space-y-1.5">
+              <div className="font-mono font-bold text-amber-300 text-xs truncate">
+                {priceAngleResult ? `${priceAngleResult.angle}° (${priceAngleResult.trendStrengthLabel})` : (loading || !priceVal ? 'Menghitung...' : `${oracleAngle}°`)}
+              </div>
+              {priceAngleResult && (
+                <div className="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
+                  {priceAngleResult.isHarmonic && (
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                      Gann Harmonic ✓
+                    </span>
+                  )}
+                  <span className="px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
+                    Arah: {priceAngleResult.direction}
+                  </span>
+                </div>
+              )}
+            </div>
+            <p className="text-[11px] text-amber-400/90 font-mono">
+              Sudut &gt;70° kelelahan; 45° seimbang
+            </p>
           </div>
         </div>
 

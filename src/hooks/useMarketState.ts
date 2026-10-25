@@ -10,6 +10,9 @@ import {
   TimeframeId, 
   fetchBinanceTimeframeHighLow 
 } from '../utils/timeframeLevels';
+import { calculateLunarPhase, LunarPhaseResult } from '../utils/lunarCycle';
+import { calculatePriceAngle, PriceAngleResult } from '../utils/priceAngle';
+import { detectCandlestickPattern, CandlestickPatternResult } from '../utils/candlestickPattern';
 
 export interface Candle {
   time: string;
@@ -638,11 +641,62 @@ export function useMarketState() {
     }
   }, [assetName, pivotInput, oracleSwingHigh, oracleSwingLow, oracleLunarPhase, oracleAngle, oracleCandle]);
 
-  // 4D Mathematical Computations
+  // Automated 4D Dimension Calculations
+  const prevPriceRef = useRef<number>(0);
+  const [lunarRefreshTrigger, setLunarRefreshTrigger] = useState<number>(0);
+
+  const lunarPhaseResult: LunarPhaseResult = useMemo(() => {
+    return calculateLunarPhase(new Date());
+  }, [lunarRefreshTrigger]);
+
   const priceVal = parseFloat(pivotInput) || livePrice;
   const sHigh = parseFloat(oracleSwingHigh) || liveHigh;
   const sLow = parseFloat(oracleSwingLow) || liveLow;
-  const angleNum = parseFloat(oracleAngle) || 45;
+
+  const priceAngleResult: PriceAngleResult = useMemo(() => {
+    return calculatePriceAngle(sHigh, sLow, priceVal, 20);
+  }, [sHigh, sLow, priceVal]);
+
+  const candlestickPatternResult: CandlestickPatternResult = useMemo(() => {
+    const gLevels = calculateGannLevels(priceVal, 0.125);
+    const prevP = prevPriceRef.current;
+    const res = detectCandlestickPattern(
+      priceVal,
+      gLevels.res1,
+      gLevels.sup1,
+      gLevels.res2,
+      gLevels.sup2,
+      prevP
+    );
+    prevPriceRef.current = priceVal;
+    return res;
+  }, [priceVal]);
+
+  const recalculateOracleDimensions = useCallback(() => {
+    setLunarRefreshTrigger(prev => prev + 1);
+  }, []);
+
+  // Sync automated calculation outputs to oracle state parameters
+  useEffect(() => {
+    if (lunarPhaseResult.oracleLabel) {
+      setOracleLunarPhase(lunarPhaseResult.oracleLabel);
+    }
+  }, [lunarPhaseResult.oracleLabel]);
+
+  useEffect(() => {
+    if (priceAngleResult.oracleAngle !== undefined) {
+      setOracleAngle(priceAngleResult.oracleAngle.toString());
+    }
+  }, [priceAngleResult.oracleAngle]);
+
+  useEffect(() => {
+    if (candlestickPatternResult.patternLabel) {
+      setOracleCandle(candlestickPatternResult.patternLabel);
+    }
+  }, [candlestickPatternResult.patternLabel]);
+
+  // 4D Mathematical Computations
+  const angleNum = parseFloat(oracleAngle) || priceAngleResult.angle;
 
   // Timeframe-specific High, Low, Range, and Confluence Entry Zone calculation
   const currentTimeframeLevels: TimeframeLevelResult = useMemo(() => {
@@ -832,6 +886,10 @@ ${oracleResult.decision === 'EXECUTE'
     setShowSideToolbar,
     isChartFullscreen,
     setIsChartFullscreen,
+    lunarPhaseResult,
+    priceAngleResult,
+    candlestickPatternResult,
+    recalculateOracleDimensions,
   };
 }
 
