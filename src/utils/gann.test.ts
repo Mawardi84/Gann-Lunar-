@@ -42,7 +42,7 @@ test('Fibonacci retracement calculation', () => {
 });
 
 test('4D Market Oracle Decision Engine', () => {
-  // Scenario 1: All 4 dimensions align -> EXECUTE
+  // Scenario 1: All 4 dimensions align -> EXECUTE BUY / LONG
   const resultExecute = evaluate4DOracle(
     4164,
     4200,
@@ -52,6 +52,7 @@ test('4D Market Oracle Decision Engine', () => {
     'Bullish Pin Bar / Hammer (Rejection)'
   );
   assert.equal(resultExecute.decision, 'EXECUTE');
+  assert.equal(resultExecute.action, 'BUY');
   assert.equal(resultExecute.isLunarValid, true);
   assert.equal(resultExecute.isSpaceHarmonic, true);
   assert.equal(resultExecute.isCandleConfirmed, true);
@@ -61,7 +62,23 @@ test('4D Market Oracle Decision Engine', () => {
   assert.ok(resultExecute.takeProfit2 > resultExecute.takeProfit1);
   assert.ok(resultExecute.takeProfit3 > resultExecute.takeProfit2);
 
-  // Scenario 2: Lunar invalid -> IGNORE
+  // Scenario 2: Bearish Rejection Pattern -> EXECUTE SELL / SHORT
+  const resultSell = evaluate4DOracle(
+    4190,
+    4200,
+    4140,
+    'Full Moon (H-1) - Jendela Volatilitas Tinggi',
+    45,
+    'Bearish Rejection / Shooting Star'
+  );
+  assert.equal(resultSell.decision, 'EXECUTE');
+  assert.equal(resultSell.action, 'SELL');
+  assert.ok(resultSell.stopLoss > 4190);
+  assert.ok(resultSell.takeProfit1 < 4190);
+  assert.ok(resultSell.takeProfit2 < resultSell.takeProfit1);
+  assert.ok(resultSell.takeProfit3 < resultSell.takeProfit2);
+
+  // Scenario 3: Lunar invalid -> IGNORE
   const resultIgnore = evaluate4DOracle(
     4164,
     4200,
@@ -72,7 +89,7 @@ test('4D Market Oracle Decision Engine', () => {
   );
   assert.equal(resultIgnore.decision, 'IGNORE');
 
-  // Scenario 3: Valid time, space, but no candlestick confirmation -> STANDBY
+  // Scenario 4: Valid time, space, but no candlestick confirmation -> STANDBY
   const resultStandby = evaluate4DOracle(
     4164,
     4200,

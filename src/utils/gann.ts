@@ -1,5 +1,6 @@
 /**
  * Pure mathematical functions for W.D. Gann Square of 9 and 4D Market Oracle.
+ * Supports bi-directional (BUY / LONG and SELL / SHORT) algorithmic decision engine.
  */
 
 export interface GannLevels {
@@ -28,6 +29,7 @@ export interface FibonacciLevels {
 
 export interface OracleDecisionResult {
   decision: 'EXECUTE' | 'STANDBY' | 'IGNORE';
+  action: 'BUY' | 'SELL';
   confluenceZoneStart: number;
   confluenceZoneEnd: number;
   closestFib: number;
@@ -102,21 +104,77 @@ export function evaluate4DOracle(
   const gann = calculateGannLevels(currentPrice, 0.125);
   const fib = calculateFibonacciLevels(swingHigh, swingLow);
 
-  // Closest Fib to current price/S1
-  const closestFib = Math.abs(currentPrice - fib.fib618) < Math.abs(currentPrice - fib.fib500)
-    ? fib.fib618
-    : fib.fib500;
+  // Directional Action Determination (BUY vs SELL)
+  const patternLower = candlestickPattern.toLowerCase();
+  const isBearishPattern = 
+    patternLower.includes('bearish') || 
+    patternLower.includes('shooting star') || 
+    patternLower.includes('breakdown') ||
+    patternLower.includes('rejection atas');
+    
+  const isBullishPattern = 
+    patternLower.includes('bullish') || 
+    patternLower.includes('hammer') || 
+    patternLower.includes('bounce') ||
+    patternLower.includes('breakout') ||
+    patternLower.includes('rejection bawah');
 
-  const confluenceZoneStart = Math.min(gann.sup1, closestFib);
-  const confluenceZoneEnd = Math.max(gann.sup1, closestFib);
+  const midpoint = (swingHigh + swingLow) / 2;
+
+  let action: 'BUY' | 'SELL' = 'BUY';
+  if (isBearishPattern) {
+    action = 'SELL';
+  } else if (isBullishPattern) {
+    action = 'BUY';
+  } else if (currentPrice > midpoint) {
+    action = 'SELL';
+  } else {
+    action = 'BUY';
+  }
+
+  // Calculate Confluence Zone & Fibonacci Level based on direction
+  let closestFib: number;
+  let confluenceZoneStart: number;
+  let confluenceZoneEnd: number;
+  let stopLoss: number;
+  let takeProfit1: number;
+  let takeProfit2: number;
+  let takeProfit3: number;
+
+  if (action === 'BUY') {
+    closestFib = Math.abs(currentPrice - fib.fib618) < Math.abs(currentPrice - fib.fib500)
+      ? fib.fib618
+      : fib.fib500;
+    confluenceZoneStart = Math.min(gann.sup1, closestFib);
+    confluenceZoneEnd = Math.max(gann.sup1, closestFib);
+    stopLoss = Math.min(gann.sup1, confluenceZoneStart) * 0.997;
+    takeProfit1 = gann.res1;
+    takeProfit2 = gann.res2;
+    takeProfit3 = gann.res3;
+  } else {
+    // SELL / SHORT
+    closestFib = Math.abs(currentPrice - fib.fib382) < Math.abs(currentPrice - fib.fib500)
+      ? fib.fib382
+      : fib.fib500;
+    confluenceZoneStart = Math.min(gann.res1, closestFib);
+    confluenceZoneEnd = Math.max(gann.res1, closestFib);
+    stopLoss = Math.max(gann.res1, confluenceZoneEnd) * 1.003;
+    takeProfit1 = gann.sup1;
+    takeProfit2 = gann.sup2;
+    takeProfit3 = gann.sup3;
+  }
 
   const isLunarValid = lunarPhase.includes('Full Moon') || lunarPhase.includes('New Moon');
   const isSpaceHarmonic = trendAngle >= 40 && trendAngle <= 55;
   const isSpaceExhausted = trendAngle > 70;
   const isCandleConfirmed =
-    candlestickPattern.includes('Pin Bar') ||
-    candlestickPattern.includes('Hammer') ||
-    candlestickPattern.includes('Engulfing');
+    patternLower.includes('pin bar') ||
+    patternLower.includes('hammer') ||
+    patternLower.includes('engulfing') ||
+    patternLower.includes('shooting star') ||
+    patternLower.includes('rejection') ||
+    patternLower.includes('breakout') ||
+    patternLower.includes('breakdown');
 
   let decision: 'EXECUTE' | 'STANDBY' | 'IGNORE' = 'STANDBY';
 
@@ -128,14 +186,9 @@ export function evaluate4DOracle(
     decision = 'STANDBY';
   }
 
-  const stopLoss = gann.sup1 * 0.997;
-  const takeProfit = gann.res1;
-  const takeProfit1 = gann.res1;
-  const takeProfit2 = gann.res2;
-  const takeProfit3 = gann.res3;
-
   return {
     decision,
+    action,
     confluenceZoneStart,
     confluenceZoneEnd,
     closestFib,
@@ -144,7 +197,7 @@ export function evaluate4DOracle(
     isSpaceExhausted,
     isCandleConfirmed,
     stopLoss,
-    takeProfit,
+    takeProfit: takeProfit1,
     takeProfit1,
     takeProfit2,
     takeProfit3,

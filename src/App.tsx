@@ -14,6 +14,8 @@ import { useMarketState } from './hooks/useMarketState';
 import { LandingPage } from './components/LandingPage';
 import { StatusBar } from './components/StatusBar';
 import { WatchlistRail } from './components/WatchlistRail';
+import { PWAInstallButton } from './components/PWAInstallButton';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 const OracleTab = lazy(() => import('./components/tabs/OracleTab').then(m => ({ default: m.OracleTab })));
 const DashboardTab = lazy(() => import('./components/tabs/DashboardTab').then(m => ({ default: m.DashboardTab })));
@@ -223,8 +225,9 @@ export default function App() {
             </button>
           </nav>
 
-          {/* Zone 3: Primary Action */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Zone 3: Primary Action & PWA Install */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <PWAInstallButton />
             <button
               onClick={() => setActiveTab('oracle')}
               className="group relative flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 rounded-md hover:shadow-[0_0_25px_rgba(245,158,11,0.45)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 whitespace-nowrap cursor-pointer shadow-md shadow-amber-500/20"
@@ -441,6 +444,9 @@ export default function App() {
           <p className="text-slate-500 font-mono text-[11px]">© 2026 Gann-Lunar Architect. Presisi 4 Dimensi Pasar.</p>
         </div>
       </footer>
+
+      {/* Offline Status Indicator */}
+      <OfflineIndicator />
 
       {/* Persistent Status Bar Fixed at Bottom */}
       <StatusBar priceSource={priceSource} activeTab={activeTab} />

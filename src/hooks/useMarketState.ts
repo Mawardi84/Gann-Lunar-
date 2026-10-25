@@ -770,6 +770,11 @@ export function useMarketState() {
   const confluenceZoneText = `${oracleResult.confluenceZoneStart.toFixed(2)} – ${oracleResult.confluenceZoneEnd.toFixed(2)}`;
 
   const structuredReportText = useMemo(() => {
+    const slLabel = oracleResult.action === 'BUY' ? 'Di bawah Support S1' : 'Di atas Resisten R1';
+    const tp1Label = oracleResult.action === 'BUY' ? 'R1' : 'S1';
+    const tp2Label = oracleResult.action === 'BUY' ? 'R2' : 'S2';
+    const tp3Label = oracleResult.action === 'BUY' ? 'R3' : 'S3';
+
     return `**1. Arsitektur Harga (Zona Konfluensi):** Level Gann Support S1 (${gannVals.sup1.toFixed(2)}) dan Resisten R1 (${gannVals.res1.toFixed(2)}) dihitung dengan (√${priceVal.toFixed(2)} ± 0.125)². Retracement Fibonacci pada rentang Swing High ${sHigh} ke Swing Low ${sLow} menghasilkan Fib 50.0% (${fibVals.fib500.toFixed(2)}) dan Fib 61.8% (${fibVals.fib618.toFixed(2)}). Titik irisan Zona Konfluensi berada di rentang harga ${confluenceZoneText}.
 
 **2. Sinkronisasi Waktu (Filter Lunar):** ${oracleResult.isLunarValid ? 'Valid' : 'Tidak Valid'} - Fase saat ini adalah ${oracleLunarPhase}. ${oracleResult.isLunarValid ? 'Jendela aktif terkonfirmasi berada dalam rentang H-2 hingga H+2 puncak fase bulan dengan gravitasi pembalikan arah tinggi.' : 'Berada di luar jendela H-2 hingga H+2 fase bulan utama (volatilitas siklus tidak sinkron).'}
@@ -780,7 +785,7 @@ export function useMarketState() {
 
 **KEPUTUSAN GANN-LUNAR ARCHITECT:**
 ${oracleResult.decision === 'EXECUTE' 
-  ? `🟢 EXECUTE: (Semua dimensi sinkron. Rekomendasi BUY di zona ${confluenceZoneText} dengan Stop Loss di ${oracleResult.stopLoss.toFixed(2)}, TP 1 di ${oracleResult.takeProfit1.toFixed(2)} [R1], TP 2 di ${oracleResult.takeProfit2.toFixed(2)} [R2], TP 3 di ${oracleResult.takeProfit3.toFixed(2)} [R3])`
+  ? `🟢 EXECUTE: (Semua dimensi sinkron. Rekomendasi ${oracleResult.action === 'BUY' ? 'BUY / LONG' : 'SELL / SHORT'} di zona ${confluenceZoneText} dengan Stop Loss di ${oracleResult.stopLoss.toFixed(2)} [${slLabel}], TP 1 di ${oracleResult.takeProfit1.toFixed(2)} [${tp1Label}], TP 2 di ${oracleResult.takeProfit2.toFixed(2)} [${tp2Label}], TP 3 di ${oracleResult.takeProfit3.toFixed(2)} [${tp3Label}])`
   : oracleResult.decision === 'STANDBY'
   ? `🟡 STANDBY: (Zona Konfluensi ${confluenceZoneText} tersentuh, menunggu konfirmasi pola candlestick Homma)`
   : `🔴 IGNORE: (Harga & Waktu tidak sinkron, abaikan dan hindari posisi)`}`;

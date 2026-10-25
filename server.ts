@@ -354,6 +354,107 @@ TUGAS ANALISIS:
   }
 });
 
+app.post('/api/journal/analyze-psychology', async (req, res) => {
+  try {
+    const { entries } = req.body;
+
+    if (!entries || !Array.isArray(entries) || entries.length === 0) {
+      return res.status(400).json({ error: 'Tidak ada catatan jurnal untuk dianalisis.' });
+    }
+
+    const formattedEntries = entries.map((e: any, index: number) => {
+      return `[Entry #${index + 1}]
+- Aset: ${e.asset || 'N/A'}
+- Posisi: ${e.tradeDirection || 'N/A'}
+- Status: ${e.tradeStatus || 'OPEN'} (P&L: ${e.pnlAmount !== undefined ? (e.pnlAmount >= 0 ? '+' : '') + e.pnlAmount : 'N/A'})
+- Evaluasi Diri Pengguna: ${e.psychologyRating || 'Disiplin'}
+- Strategi: ${e.strategyTag || 'Unspecified'}
+- Catatan Trading: "${e.notes || e.oracleReport || 'Tanpa catatan'}"
+- Timestamp: ${e.timestamp || 'N/A'}`;
+    }).join('\n\n');
+
+    const prompt = `Bertindaklah sebagai Senior Trading Psychologist & Behavioral Finance Specialist terkemuka.
+Analisis seluruh riwayat transaksi dan catatan evaluasi trading pengguna berikut secara komprehensif:
+
+${formattedEntries}
+
+TUGAS DIAGNOSIS PSIKOLOGI:
+1. Hitung "Skor Kesehatan Psikologis" (0-100) berdasarkan tingkat kedisiplinan, kontrol emosi, dan konsistensi catatan.
+2. Identifikasi bias psikologis spesifik yang terdeteksi dalam catatan pengguna (seperti 'Over-trading', 'FOMO (Fear Of Missing Out)', 'Revenge Trading / Dendam', 'Loss Aversion / Takut Cut Loss', 'Greed / Over-leveraging', 'Impulsif', atau 'Disiplin Tinggi').
+3. Jelaskan bukti/sitasi spesifik dari catatan pengguna yang menunjukkan bias tersebut.
+4. Evaluasi sentimen emosional utama (Euforia, Panik, Cemas, Disiplin, Balas Dendam, atau Netral).
+5. Berikan 3-5 langkah tindakan konkret dan praktis untuk memperbaiki atau mempertahankan kebiasaan trading pengguna.
+
+FORMAT KELUARAN YANG WAJIB DIGUNAKAN (dalam Bahasa Indonesia profesional):
+**SKOR KESEHATAN PSIKOLOGIS:** [Nilai 0-100] / 100 - [Kategori: Optimal / Stabil / Perlu Perhatian / Kritis]
+
+**SENTIMEN EMOSIONAL DOMINAN:** [Nama Sentimen]
+
+**DETEKSI BIAS TRADING:**
+• [Bias 1] (Tingkat Keparahan: Tinggi/Sedang/Rendah): [Penjelasan & kutipan catatan]
+• [Bias 2] (Tingkat Keparahan: Tinggi/Sedang/Rendah): [Penjelasan & kutipan catatan]
+
+**DIAGNOSIS PSIKOLOGI TRADER:**
+[Penjelasan mendalam 1-2 paragraf mengenai kondisi mental trader berdasarkan data historis]
+
+**REKOMENDASI & TINDAKAN PERBAIKAN:**
+1. [Saran praktis 1]
+2. [Saran praktis 2]
+3. [Saran praktis 3]
+`;
+
+    const aiPromise = ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: 'Anda adalah Senior Trading Psychologist terkemuka. Berikan analisis psikologi trading yang tajam, empatik, objektif, dan berwawasan tinggi dalam Bahasa Indonesia.',
+        temperature: 0.3,
+      },
+    });
+
+    const timeoutPromise = new Promise<{ text?: string }>((_, reject) => {
+      setTimeout(() => reject(new Error('AI request timeout')), 12000);
+    });
+
+    let reportText = '';
+    try {
+      const response = await Promise.race([aiPromise, timeoutPromise]);
+      reportText = response.text || '';
+    } catch {
+      // Deterministic psychological analysis fallback
+      const totalCount = entries.length;
+      const fomoCount = entries.filter((e: any) => e.psychologyRating === 'FOMO' || (e.notes && e.notes.toLowerCase().includes('fomo'))).length;
+      const dendamCount = entries.filter((e: any) => e.psychologyRating === 'Dendam' || (e.notes && e.notes.toLowerCase().includes('dendam'))).length;
+      const impulsifCount = entries.filter((e: any) => e.psychologyRating === 'Impulsif').length;
+      const disiplinCount = entries.filter((e: any) => e.psychologyRating === 'Disiplin' || e.psychologyRating === 'Sabar').length;
+
+      const score = Math.max(30, Math.min(95, Math.round(70 + (disiplinCount * 8) - (fomoCount * 12) - (dendamCount * 15) - (impulsifCount * 10))));
+
+      reportText = `**SKOR KESEHATAN PSIKOLOGIS:** ${score} / 100 - ${score >= 80 ? 'Optimal' : score >= 60 ? 'Stabil' : 'Perlu Perhatian'}
+
+**SENTIMEN EMOSIONAL DOMINAN:** ${fomoCount > 0 ? 'FOMO / Terburu-buru' : dendamCount > 0 ? 'Balas Dendam / Emosional' : 'Disiplin / Terkontrol'}
+
+**DETEKSI BIAS TRADING:**
+• ${fomoCount > 0 ? 'FOMO (Fear of Missing Out) (Tingkat Keparahan: Sedang)' : 'Disiplin Eksekusi (Tingkat Keparahan: Baik)'}: Terdeteksi ${fomoCount > 0 ? `${fomoCount} transaksi dengan indikasi FOMO` : 'kedisiplinan sesuai rencana trading'}.
+• ${dendamCount > 0 ? 'Revenge Trading (Tingkat Keparahan: Tinggi)' : 'Manajemen Emosi Loss (Tingkat Keparahan: Baik)'}: ${dendamCount > 0 ? 'Terdapat potensi transaksi emosional pasca kerugian.' : 'Tidak terdeteksi transaksi balas dendam pasca loss.'}
+
+**DIAGNOSIS PSIKOLOGI TRADER:**
+Berdasarkan sampel ${totalCount} transaksi yang dicatat, kesehatan psikologis trading berada pada tingkat ${score}/100. Disiplin pencatatan jurnal membantu mengidentifikasi pemicu emosional utama saat menghadapi volatilitas pasar.
+
+**REKOMENDASI & TINDAKAN PERBAIKAN:**
+1. Buat jeda wajib (*cooling-off period*) selama 30 menit setelah mengalami kerugian (Loss) sebelum membuka posisi baru.
+2. Pastikan setiap entry memenuhi minimal 3 dari 4 konfluensi (Gann, Lunar, Pythagoras, & Homma) untuk menghindari kebiasaan FOMO.
+3. Patuhi aturan risiko maksimal 1-2% per transaksi tanpa melakukan over-leveraging.`;
+    }
+
+    res.json({ analysis: reportText });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Gagal menghasilkan analisis psikologi AI.';
+    console.error('Gemini Journal Psychology API Error:', error);
+    res.status(500).json({ error: message });
+  }
+});
+
 async function startServer() {
   const vite = await createViteServer({
     server: { middlewareMode: true },

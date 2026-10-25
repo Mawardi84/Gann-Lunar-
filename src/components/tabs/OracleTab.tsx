@@ -691,42 +691,56 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
 
             {oracleResult.decision === 'EXECUTE' && (
               <div className="space-y-3 font-mono text-xs sm:text-sm">
-                <div className="p-4 bg-emerald-950/50 border border-emerald-500/40 rounded-xl space-y-2">
-                  <div className="text-emerald-300 font-bold text-sm">
-                    🟢 EXECUTE: Semua 4 Dimensi Sinkron Sempurna!
+                <div className={`p-4 rounded-xl border space-y-2 ${
+                  oracleResult.action === 'BUY' 
+                    ? 'bg-emerald-950/50 border-emerald-500/40' 
+                    : 'bg-rose-950/50 border-rose-500/40'
+                }`}>
+                  <div className={`font-bold text-sm ${oracleResult.action === 'BUY' ? 'text-emerald-300' : 'text-rose-300'}`}>
+                    {oracleResult.action === 'BUY' ? '🟢 EXECUTE: Rekomendasi Beli (BUY / LONG) - Semua 4 Dimensi Sinkron!' : '🔴 EXECUTE: Rekomendasi Jual (SELL / SHORT) - Semua 4 Dimensi Sinkron!'}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
                     <div>
                       <span className="text-slate-400">Rekomendasi Tindakan:</span>
-                      <div className="text-white font-bold text-sm">BUY / LONG POSISI</div>
+                      <div className={`font-black text-sm ${oracleResult.action === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {oracleResult.action === 'BUY' ? 'BUY / LONG POSISI' : 'SELL / SHORT POSISI'}
+                      </div>
                     </div>
                     <div>
                       <span className="text-slate-400">Area Entry (Zona Konfluensi):</span>
-                      <div className="text-emerald-400 font-bold text-sm">{confluenceZoneText}</div>
+                      <div className="text-amber-300 font-bold text-sm">{confluenceZoneText}</div>
                     </div>
                     <div>
                       <span className="text-slate-400">Letak Stop Loss (SL):</span>
                       <div className="text-rose-400 font-bold text-sm">
-                        {oracleResult.stopLoss.toFixed(2)}{' '}
-                        <span className="text-[10px] text-slate-400 font-normal">(Di bawah level Gann Support S1)</span>
+                        ${oracleResult.stopLoss.toFixed(2)}{' '}
+                        <span className="text-[10px] text-slate-400 font-normal">
+                          {oracleResult.action === 'BUY' ? '(Di bawah level Gann Support S1)' : '(Di atas level Gann Resisten R1)'}
+                        </span>
                       </div>
                     </div>
                     <div className="sm:col-span-2 mt-2 pt-2 border-t border-slate-800">
                       <span className="text-slate-400 font-medium">Target Take Profit Bertingkat (TP 1, TP 2, TP 3):</span>
                       <div className="grid grid-cols-3 gap-2.5 mt-2">
                         <div className="bg-slate-900/90 border border-emerald-500/40 p-2.5 rounded-xl text-center">
-                          <span className="text-[10px] text-emerald-400 font-bold block uppercase tracking-wider">TP 1 (Gann R1)</span>
-                          <span className="text-emerald-300 font-bold text-sm font-mono">{oracleResult.takeProfit1.toFixed(2)}</span>
+                          <span className="text-[10px] text-emerald-400 font-bold block uppercase tracking-wider">
+                            TP 1 ({oracleResult.action === 'BUY' ? 'Gann R1' : 'Gann S1'})
+                          </span>
+                          <span className="text-emerald-300 font-bold text-sm font-mono">${oracleResult.takeProfit1.toFixed(2)}</span>
                           <span className="text-[9px] text-slate-400 block mt-0.5">Conservative</span>
                         </div>
                         <div className="bg-slate-900/90 border border-teal-500/40 p-2.5 rounded-xl text-center">
-                          <span className="text-[10px] text-teal-400 font-bold block uppercase tracking-wider">TP 2 (Gann R2)</span>
-                          <span className="text-teal-300 font-bold text-sm font-mono">{oracleResult.takeProfit2.toFixed(2)}</span>
+                          <span className="text-[10px] text-teal-400 font-bold block uppercase tracking-wider">
+                            TP 2 ({oracleResult.action === 'BUY' ? 'Gann R2' : 'Gann S2'})
+                          </span>
+                          <span className="text-teal-300 font-bold text-sm font-mono">${oracleResult.takeProfit2.toFixed(2)}</span>
                           <span className="text-[9px] text-slate-400 block mt-0.5">Harmonic 90°</span>
                         </div>
                         <div className="bg-slate-900/90 border border-cyan-500/40 p-2.5 rounded-xl text-center">
-                          <span className="text-[10px] text-cyan-400 font-bold block uppercase tracking-wider">TP 3 (Gann R3)</span>
-                          <span className="text-cyan-300 font-bold text-sm font-mono">{oracleResult.takeProfit3.toFixed(2)}</span>
+                          <span className="text-[10px] text-cyan-400 font-bold block uppercase tracking-wider">
+                            TP 3 ({oracleResult.action === 'BUY' ? 'Gann R3' : 'Gann S3'})
+                          </span>
+                          <span className="text-cyan-300 font-bold text-sm font-mono">${oracleResult.takeProfit3.toFixed(2)}</span>
                           <span className="text-[9px] text-slate-400 block mt-0.5">Extended 180°</span>
                         </div>
                       </div>

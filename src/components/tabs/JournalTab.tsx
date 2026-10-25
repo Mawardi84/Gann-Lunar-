@@ -3,7 +3,8 @@ import {
   BookOpen, Trash2, Copy, Check, Clock, TrendingUp, TrendingDown, 
   PlusCircle, Download, Search, Filter, ShieldCheck, DollarSign, 
   BarChart2, Target, Award, X, PieChart, Scale, Activity,
-  Zap, CheckCircle2, XCircle
+  Zap, CheckCircle2, XCircle, Brain, Sparkles, RefreshCw,
+  AlertTriangle, Lightbulb
 } from 'lucide-react';
 import { MarketState, JournalEntry } from '../../hooks/useMarketState';
 
@@ -27,12 +28,48 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
   } = state;
 
   // UI state
-  const [tabMode, setTabMode] = useState<'ENTRIES' | 'SUMMARY'>('ENTRIES');
+  const [tabMode, setTabMode] = useState<'ENTRIES' | 'SUMMARY' | 'PSYCHOLOGY'>('ENTRIES');
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'TRADE' | 'SNAPSHOT'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'WIN' | 'LOSS' | 'OPEN'>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // AI Psychology Analysis state
+  const [isAnalyzingPsychology, setIsAnalyzingPsychology] = useState<boolean>(false);
+  const [psychologyResult, setPsychologyResult] = useState<string | null>(null);
+  const [psychologyError, setPsychologyError] = useState<string | null>(null);
+
+  const handleAnalyzePsychology = async (targetEntries?: JournalEntry[]) => {
+    const entriesToAnalyze = targetEntries || journalEntries;
+    if (entriesToAnalyze.length === 0) {
+      alert('Tidak ada catatan jurnal untuk dianalisis oleh AI.');
+      return;
+    }
+
+    setIsAnalyzingPsychology(true);
+    setPsychologyError(null);
+
+    try {
+      const res = await fetch('/api/journal/analyze-psychology', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entries: entriesToAnalyze }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Gagal memproses analisis psikologi AI.');
+      }
+      setPsychologyResult(data.analysis);
+      setTabMode('PSYCHOLOGY');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setPsychologyError(msg);
+    } finally {
+      setIsAnalyzingPsychology(false);
+    }
+  };
 
   // New Trade Form state
   const [tradeAsset, setTradeAsset] = useState<string>(assetName);
@@ -266,6 +303,25 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
 
           <div className="flex items-center gap-2.5 flex-wrap">
             <button
+              onClick={() => {
+                setTabMode('PSYCHOLOGY');
+                if (!psychologyResult && !isAnalyzingPsychology && journalEntries.length > 0) {
+                  handleAnalyzePsychology();
+                }
+              }}
+              disabled={isAnalyzingPsychology}
+              className="px-3.5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-500/20 transition-all cursor-pointer flex items-center gap-1.5 border border-purple-400/30"
+              title="Deteksi bias psikologi (FOMO, Over-Trading, Revenge Trading) menggunakan AI Gemini 3.8"
+            >
+              {isAnalyzingPsychology ? (
+                <RefreshCw className="w-4 h-4 animate-spin text-purple-200" />
+              ) : (
+                <Brain className="w-4 h-4 text-purple-200" />
+              )}
+              <span>Analisis Psikologi AI</span>
+            </button>
+
+            <button
               onClick={() => setShowAddModal(true)}
               className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-2 border border-emerald-300/40"
             >
@@ -310,7 +366,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
       </div>
 
       {/* Main View Mode Switcher Bar */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 flex-wrap">
         <button
           onClick={() => setTabMode('ENTRIES')}
           className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center gap-2 border transition-all cursor-pointer ${
@@ -332,7 +388,27 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
           }`}
         >
           <PieChart className="w-4 h-4" />
-          <span>Summary & Rapor Performa (Analytics View)</span>
+          <span>Summary & Rapor Performa</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setTabMode('PSYCHOLOGY');
+            if (!psychologyResult && !isAnalyzingPsychology && journalEntries.length > 0) {
+              handleAnalyzePsychology();
+            }
+          }}
+          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center gap-2 border transition-all cursor-pointer ${
+            tabMode === 'PSYCHOLOGY'
+              ? 'bg-purple-600 text-white border-purple-400 font-extrabold shadow-md'
+              : 'bg-slate-900/80 text-purple-300 border-purple-900/40 hover:text-white hover:border-purple-700'
+          }`}
+        >
+          <Brain className="w-4 h-4 text-purple-300" />
+          <span>Analisis Sentimen & Bias AI</span>
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-200 border border-purple-500/30">
+            GEMINI 3.8
+          </span>
         </button>
       </div>
 
@@ -513,6 +589,222 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* View Mode 3: Psychology & Sentiment AI Analysis View */}
+      {tabMode === 'PSYCHOLOGY' && (
+        <div className="space-y-6">
+          {/* Psychology Banner */}
+          <div className="bg-gradient-to-r from-purple-950/60 via-slate-900 to-indigo-950/60 border border-purple-500/30 rounded-md p-6 shadow-2xl relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300">
+                    <Brain className="w-5 h-5" />
+                  </span>
+                  <span className="px-3 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-full text-xs font-mono font-bold">
+                    AI BEHAVIORAL FINANCE & PSYCHOLOGY ENGINE
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                  Analisis Bias Psikologi & <span className="text-purple-400">Sentimen Catatan Trading</span>
+                </h2>
+                <p className="text-xs text-slate-300 max-w-2xl leading-relaxed font-mono">
+                  Engine AI Gemini 3.8 memproses seluruh pola catatan jurnal Anda untuk mendeteksi bias emosional seperti <strong className="text-rose-400">Over-Trading</strong>, <strong className="text-amber-300">FOMO</strong>, <strong className="text-rose-300">Revenge Trading</strong>, & <strong className="text-cyan-300 font-normal">Loss Aversion</strong> secara objektif.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleAnalyzePsychology()}
+                  disabled={isAnalyzingPsychology || journalEntries.length === 0}
+                  className={`px-5 py-3 rounded-xl font-black text-xs transition-all flex items-center gap-2 border shadow-lg ${
+                    isAnalyzingPsychology || journalEntries.length === 0
+                      ? 'bg-purple-950/50 text-purple-400/50 border-purple-900/30 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white border-purple-300/40 cursor-pointer shadow-purple-500/25'
+                  }`}
+                >
+                  {isAnalyzingPsychology ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Menganalisis Catatan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span>{psychologyResult ? 'Jalankan Ulang Diagnostik AI' : 'Jalankan Diagnostik Psikologi AI'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {psychologyError && (
+            <div className="bg-rose-950/80 border border-rose-500/50 text-rose-300 p-4 rounded-md text-xs font-mono flex items-center justify-between shadow-lg">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <span>Error Diagnostik: {psychologyError}</span>
+              </div>
+              <button
+                onClick={() => handleAnalyzePsychology()}
+                className="px-3 py-1 bg-rose-900/50 hover:bg-rose-900 text-rose-200 border border-rose-700 rounded-md font-bold transition-all"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          )}
+
+          {/* Loading Indicator State */}
+          {isAnalyzingPsychology && (
+            <div className="bg-slate-900/90 border border-purple-500/40 rounded-md p-12 text-center space-y-4 shadow-2xl animate-pulse">
+              <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mx-auto">
+                <Brain className="w-8 h-8 animate-spin" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-white">Engine AI Gemini 3.8 Sedang Bekerja...</h3>
+                <p className="text-xs text-slate-400 max-w-md mx-auto font-mono">
+                  Menganalisis {journalEntries.length} entri jurnal, mendeteksi korelasi emosi, frekuensi transaksi, & bias psikologi...
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Diagnostic Result Card */}
+          {!isAnalyzingPsychology && psychologyResult && (
+            <div className="bg-slate-900/90 border border-purple-500/40 rounded-md p-6 sm:p-8 shadow-2xl space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-white tracking-wide">
+                      Laporan Diagnostik Psikologi Trading & Bias Behavioral
+                    </h3>
+                    <p className="text-xs text-slate-400 font-mono">
+                      Diproses berdasarkan sampel {journalEntries.length} catatan jurnal pengguna
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleCopyReport('psychology-report', psychologyResult)}
+                    className="px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-purple-300 font-mono text-xs font-bold border border-slate-800 transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    {copiedId === 'psychology-report' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedId === 'psychology-report' ? 'Tersalin' : 'Salin Laporan'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Rendered Diagnostic Text Box */}
+              <div className="bg-slate-950 p-6 rounded-md border border-slate-800/80 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed space-y-4">
+                {psychologyResult}
+              </div>
+            </div>
+          )}
+
+          {/* Empty Prompt State when no analysis generated yet */}
+          {!isAnalyzingPsychology && !psychologyResult && (
+            <div className="bg-slate-900/60 border border-slate-800 rounded-md p-10 text-center space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mx-auto">
+                <Brain className="w-7 h-7" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-white">Belum Ada Analisis Psikologi AI Ditampilkan</h3>
+                <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                  Klik tombol &quot;Jalankan Diagnostik Psikologi AI&quot; di atas untuk menganalisis {journalEntries.length} catatan trading tersimpan Anda secara mendalam.
+                </p>
+              </div>
+              {journalEntries.length > 0 ? (
+                <button
+                  onClick={() => handleAnalyzePsychology()}
+                  className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-2 shadow-lg shadow-purple-500/20"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Jalankan Diagnostik Psikologi Sekarang</span>
+                </button>
+              ) : (
+                <p className="text-xs text-amber-400 font-mono">
+                  * Tambahkan minimal 1 catatan transaksi di tab &quot;Daftar Jurnal & Transaksi&quot; untuk mengaktifkan AI.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Behavioral Bias Knowledge Reference Cards */}
+          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-xs font-mono font-bold text-slate-300">
+              <Lightbulb className="w-4 h-4 text-amber-400" />
+              <span>KAMUS BIAS PSIKOLOGI TRADING TERINTEGRASI</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-mono">
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1.5">
+                <div className="flex items-center gap-2 text-rose-400 font-bold">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>1. Over-Trading</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Frekuensi transaksi berlebihan tanpa menunggu setup konfluensi matang. Dipicu rasa bosan atau dorongan mengejar profit secara konstan.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1.5">
+                <div className="flex items-center gap-2 text-amber-300 font-bold">
+                  <Zap className="w-4 h-4" />
+                  <span>2. FOMO (Fear of Missing Out)</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Masuk pasar di puncak/lembah pergerakan harga karena takut tertinggal reli. Mengabaikan konfluensi Gann & level Stop Loss ideal.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1.5">
+                <div className="flex items-center gap-2 text-rose-300 font-bold">
+                  <Activity className="w-4 h-4" />
+                  <span>3. Revenge Trading (Dendam)</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Membuka posisi agresif langsung pasca mengalami Loss untuk &quot;membalas&quot; pasar. Sering disertai ukuran lot berlebihan.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1.5">
+                <div className="flex items-center gap-2 text-cyan-300 font-bold">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>4. Loss Aversion (Takut Cut Loss)</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Enggan memotong kerugian (Cut Loss) sesuai plan dengan harapan harga akan membalik. Mengubah SL menjadi jauh atau tanpa SL.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1.5">
+                <div className="flex items-center gap-2 text-purple-300 font-bold">
+                  <BarChart2 className="w-4 h-4" />
+                  <span>5. Confirmation Bias</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Hanya mencari berita atau indikator yang mendukung opini awal, serta mengabaikan sinyal pembatalan dari dimensi 4D Oracle.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1.5">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>6. Disiplin Plan (Target Ideal)</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Membuka dan menutup posisi strictly berdasarkan filter 4 Dimensi (Gann, Lunar, Pythagoras, & Homma) dengan RR minim 1:1.5.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -708,6 +1000,14 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
                       </div>
 
                       <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleAnalyzePsychology([entry])}
+                          className="px-2.5 py-1 rounded-md bg-purple-950/60 hover:bg-purple-900/80 text-purple-300 font-mono text-[11px] flex items-center gap-1 border border-purple-800/60 transition-all cursor-pointer"
+                          title="Analisis bias & sentimen catatan entry ini dengan Gemini AI"
+                        >
+                          <Brain className="w-3 h-3 text-purple-300" />
+                          <span>Bias AI</span>
+                        </button>
                         {entry.oracleReport && (
                           <button
                             onClick={() => handleCopyReport(entry.id, entry.oracleReport || '')}
