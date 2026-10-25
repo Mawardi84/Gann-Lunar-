@@ -67,10 +67,21 @@ export interface JournalEntry {
   id: string;
   timestamp: string;
   asset: string;
-  oracleReport: string;
+  oracleReport?: string;
   price: number;
   confluenceScore?: number;
   decision?: string;
+  entryType?: 'SNAPSHOT' | 'TRADE';
+  tradeDirection?: 'BUY' | 'SELL';
+  entryPrice?: number;
+  stopLoss?: number;
+  takeProfit?: number;
+  lotSize?: number;
+  pnlAmount?: number;
+  tradeStatus?: 'WIN' | 'LOSS' | 'OPEN' | 'CANCELLED';
+  strategyTag?: string;
+  notes?: string;
+  psychologyRating?: 'Disiplin' | 'FOMO' | 'Dendam' | 'Sabar' | 'Impulsif';
 }
 
 export type TabType = 
