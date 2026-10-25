@@ -84,7 +84,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           
           {/* Top Brand Tag on Landing */}
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 via-slate-900 to-slate-950 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.25)]">
+            <div className="w-12 h-12 rounded-md bg-gradient-to-br from-amber-500/20 via-slate-900 to-slate-950 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.25)]">
               <Orbit className="w-6 h-6 text-amber-400 animate-spin-slow" />
             </div>
             <div>
@@ -176,7 +176,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Dimensi 1: Harga */}
-          <div className="bg-slate-900/60 border border-slate-800/80 hover:border-amber-500/40 rounded-2xl p-6 space-y-4 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/5 group flex flex-col justify-between">
+          <div className="bg-slate-900/60 border border-slate-800/80 hover:border-amber-500/40 rounded-md p-6 space-y-4 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/5 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
                 <Target className="w-6 h-6" />
@@ -196,7 +196,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Dimensi 2: Waktu */}
-          <div className="bg-slate-900/60 border border-slate-800/80 hover:border-purple-500/40 rounded-2xl p-6 space-y-4 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/5 group flex flex-col justify-between">
+          <div className="bg-slate-900/60 border border-slate-800/80 hover:border-purple-500/40 rounded-md p-6 space-y-4 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/5 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                 <Moon className="w-6 h-6" />
@@ -216,7 +216,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Dimensi 3: Ruang */}
-          <div className="bg-slate-900/60 border border-slate-800/80 hover:border-cyan-500/40 rounded-2xl p-6 space-y-4 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/5 group flex flex-col justify-between">
+          <div className="bg-slate-900/60 border border-slate-800/80 hover:border-cyan-500/40 rounded-md p-6 space-y-4 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/5 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
                 <Compass className="w-6 h-6" />
@@ -236,7 +236,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Dimensi 4: Psikologi */}
-          <div className="bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 rounded-2xl p-6 space-y-4 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 group flex flex-col justify-between">
+          <div className="bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 rounded-md p-6 space-y-4 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
                 <Eye className="w-6 h-6" />
@@ -258,7 +258,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         {/* Feature Spotlight Card with Generated 4D Visualization */}
-        <div className="bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-950 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12 items-center">
+        <div className="bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-950 border border-slate-800 rounded-md overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12 items-center">
           <div className="lg:col-span-6 p-8 sm:p-12 space-y-6">
             <div className="flex items-center gap-2 text-xs font-mono text-amber-400 font-semibold">
               <Orbit className="w-4 h-4" />
@@ -321,7 +321,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* IGNORE */}
-          <div className="bg-slate-900/60 border border-rose-900/40 rounded-2xl p-6 space-y-4 relative overflow-hidden">
+          <div className="bg-slate-900/60 border border-rose-900/40 rounded-md p-6 space-y-4 relative overflow-hidden">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 font-black text-xl">
                 🔴
@@ -340,7 +340,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* STANDBY */}
-          <div className="bg-slate-900/60 border border-amber-900/40 rounded-2xl p-6 space-y-4 relative overflow-hidden">
+          <div className="bg-slate-900/60 border border-amber-900/40 rounded-md p-6 space-y-4 relative overflow-hidden">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-black text-xl">
                 🟡
@@ -359,7 +359,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* EXECUTE */}
-          <div className="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 space-y-4 relative overflow-hidden">
+          <div className="bg-slate-900/60 border border-emerald-900/40 rounded-md p-6 space-y-4 relative overflow-hidden">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-xl">
                 🟢
@@ -382,7 +382,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* FINAL CALL TO ACTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 pt-6">
-        <div className="bg-gradient-to-r from-amber-500/10 via-slate-900 to-amber-500/10 border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-6">
+        <div className="bg-gradient-to-r from-amber-500/10 via-slate-900 to-amber-500/10 border border-slate-800 rounded-md p-8 sm:p-12 space-y-6">
           <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
             Siap Memvalidasi Setup Trading Anda?
           </h2>

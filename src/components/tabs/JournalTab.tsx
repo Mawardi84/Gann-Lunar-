@@ -29,7 +29,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl backdrop-blur-sm">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 sm:p-8 shadow-xl backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -69,8 +69,8 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
 
       {/* Snapshot List */}
       {journalEntries.length === 0 ? (
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-center text-slate-400 mx-auto">
+        <div className="bg-slate-900/60 border border-slate-800 rounded-md p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-md bg-slate-800/60 border border-slate-700/60 flex items-center justify-center text-slate-400 mx-auto">
             <BookOpen className="w-6 h-6" />
           </div>
           <h3 className="text-base font-bold text-white">Belum Ada Snapshot Tersimpan</h3>
@@ -96,7 +96,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({ state }) => {
               return (
                 <div
                   key={entry.id}
-                  className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4 hover:border-slate-700 transition-all"
+                  className="bg-slate-900/90 border border-slate-800 rounded-md p-5 shadow-lg space-y-4 hover:border-slate-700 transition-all"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800 text-xs">
                     <div className="flex items-center gap-3">

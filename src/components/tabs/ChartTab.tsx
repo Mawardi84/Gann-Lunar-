@@ -53,7 +53,7 @@ export const ChartTab: React.FC<ChartTabProps> = ({ state }) => {
 
   return (
     <div className={`space-y-6 mx-auto transition-all ${isChartFullscreen ? 'fixed inset-0 z-50 bg-slate-950 p-6 overflow-y-auto max-w-none' : 'max-w-6xl'}`}>
-      <div className={`bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-5 ${isChartFullscreen ? 'min-h-[90vh] flex flex-col' : ''}`}>
+      <div className={`bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl backdrop-blur-sm space-y-5 ${isChartFullscreen ? 'min-h-[90vh] flex flex-col' : ''}`}>
         
         {/* Header & Quick Action */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">

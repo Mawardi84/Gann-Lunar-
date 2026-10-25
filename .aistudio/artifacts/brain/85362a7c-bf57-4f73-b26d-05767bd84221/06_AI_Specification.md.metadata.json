@@ -1,6 +1,0 @@
-{
-  "summary": "Hybrid AI Specification (P05) defining allowed and forbidden AI tasks, source grounding/citation rules, output schemas, hallucination controls, fallback handling, provider abstraction via Google GenAI SDK, and rate limit/latency safeguards.",
-  "updatedAt": "2026-10-20T02:59:43.366652142Z",
-  "requestFeedback": true,
-  "userFacing": true
-}

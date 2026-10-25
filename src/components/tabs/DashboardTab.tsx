@@ -169,7 +169,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ state }) => {
         </div>
 
         {/* Bottom Section: Automated Trading Tool (W.D. Gann) */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl backdrop-blur-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-2">
               <Calculator className="w-5 h-5 text-amber-400" />

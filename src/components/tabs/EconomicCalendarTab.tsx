@@ -40,14 +40,16 @@ const renderSparklineSvg = (points: number[]) => {
   }).join(' ');
 
   return (
-    <svg width={w} height={h} className="inline-block overflow-visible my-0.5" title="Tren Nowcast 3 Bulan Terakhir">
-      <polyline fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={pts} />
-      {points.map((p, idx) => {
-        const x = (idx / (points.length - 1 || 1)) * w;
-        const y = h - ((p - min) / range) * (h - 4) - 2;
-        return <circle key={idx} cx={isNaN(x) ? 0 : x} cy={isNaN(y) ? h / 2 : y} r="1.5" fill="#f59e0b" />;
-      })}
-    </svg>
+    <span title="Ilustrasi tren, bukan data nowcast historis aktual">
+      <svg width={w} height={h} className="inline-block overflow-visible my-0.5">
+        <polyline fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+        {points.map((p, idx) => {
+          const x = (idx / (points.length - 1 || 1)) * w;
+          const y = h - ((p - min) / range) * (h - 4) - 2;
+          return <circle key={idx} cx={isNaN(x) ? 0 : x} cy={isNaN(y) ? h / 2 : y} r="1.5" fill="#f59e0b" />;
+        })}
+      </svg>
+    </span>
   );
 };
 
@@ -197,7 +199,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Hero Header */}
-      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-md p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
@@ -237,7 +239,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-center shrink-0 space-y-1 w-full sm:w-auto">
+            <div className="bg-slate-900/90 border border-slate-800 rounded-md p-4 text-center shrink-0 space-y-1 w-full sm:w-auto">
               <span className="text-[10px] text-slate-400 font-mono uppercase">Spot Gold (XAU/USD)</span>
               <div className="text-xl font-mono font-bold text-emerald-400">${livePrice.toLocaleString()}</div>
               <span className="text-[10px] text-amber-400 font-mono flex items-center justify-center gap-1">
@@ -264,7 +266,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
           <h2 className="text-sm font-bold text-white uppercase tracking-wider">Tampilan Kalender</h2>
         </div>
 
-        <div className="flex items-center bg-slate-900/90 border border-slate-800 rounded-2xl p-1 text-xs font-mono">
+        <div className="flex items-center bg-slate-900/90 border border-slate-800 rounded-md p-1 text-xs font-mono">
           <button
             onClick={() => setViewMode('dual')}
             className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
@@ -313,7 +315,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
       {(viewMode === 'radar' || viewMode === 'dual') && (
         <div className="space-y-6">
           {/* Filter Bar Controls */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-5 shadow-xl space-y-4">
             
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               
@@ -544,7 +546,11 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
                                 ? (
                                     <div className="flex items-center justify-between gap-1">
                                       <span>{event.nowcast_value !== null && event.nowcast_value !== undefined ? `${event.nowcast_value}${event.unit}` : 'N/A'}</span>
-                                      {renderSparklineSvg(getNowcastSparklinePoints(event))}
+                                      {renderSparklineSvg(getNowcastSparklinePoints({
+                                        previous_value: typeof event.previous === 'number' ? event.previous : (event.previous ? parseFloat(String(event.previous)) : null),
+                                        consensus_value: typeof event.forecast === 'number' ? event.forecast : (event.forecast ? parseFloat(String(event.forecast)) : null),
+                                        nowcast_value: typeof event.nowcast_value === 'number' ? event.nowcast_value : (event.nowcast_value ? parseFloat(String(event.nowcast_value)) : null),
+                                      }))}
                                     </div>
                                   )
                                 : '-'}
@@ -644,7 +650,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
           </div>
 
           {filteredEvents.length === 0 && (
-            <div className="p-12 text-center bg-slate-900/60 border border-slate-800 rounded-3xl space-y-3">
+            <div className="p-12 text-center bg-slate-900/60 border border-slate-800 rounded-md space-y-3">
               <Calendar className="w-8 h-8 text-slate-500 mx-auto" />
               <h3 className="text-sm font-bold text-white">Tidak ada data rilis acara yang cocok</h3>
               <p className="text-xs text-slate-400 font-mono max-w-md mx-auto leading-relaxed">
@@ -680,7 +686,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
       {/* Deep Event Modal: Analysis, Gann Confluence, & Surprise Simulator */}
       {modalEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-6 my-8">
+          <div className="bg-slate-900 border border-slate-800 rounded-md max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-6 my-8">
             
             {/* Modal Header */}
             <div className="flex items-start justify-between pb-4 border-b border-slate-800 gap-4">
@@ -786,7 +792,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
 
                   {/* Market Bias Banner for CPI events */}
                   {isCPI && biasResult && biasResult.bias !== 'UNKNOWN' && (
-                    <div className="bg-slate-950 p-4 rounded-2xl border border-amber-500/30 space-y-3 font-mono">
+                    <div className="bg-slate-950 p-4 rounded-md border border-amber-500/30 space-y-3 font-mono">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-800">
                         <div className="flex items-center gap-2">
                           <Activity className="w-4 h-4 text-amber-400" />
@@ -842,7 +848,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
             })()}
 
             {/* Interactive Surprise Simulator */}
-            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white font-mono flex items-center gap-1.5">
                   <Zap className="w-3.5 h-3.5 text-amber-400" />
@@ -905,7 +911,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
             </div>
 
             {/* Gann Impact Notes */}
-            <div className="bg-amber-950/20 border border-amber-500/30 p-4 rounded-2xl text-xs font-mono space-y-1.5">
+            <div className="bg-amber-950/20 border border-amber-500/30 p-4 rounded-md text-xs font-mono space-y-1.5">
               <div className="flex items-center gap-2 text-amber-300 font-bold">
                 <Compass className="w-4 h-4 text-amber-400" />
                 <span>Korelasi Siklus Gann & Arah Harga (XAU/USD):</span>

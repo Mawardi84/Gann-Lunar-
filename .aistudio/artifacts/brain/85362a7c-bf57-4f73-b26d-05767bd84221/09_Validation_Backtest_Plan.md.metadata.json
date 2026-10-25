@@ -1,6 +1,0 @@
-{
-  "summary": "Validation and Backtest Plan (P08) establishing event study methodology, chronological train/validation/test splits, leakage audits, handling of revisions and overlapping events, out-of-sample performance metrics, and drift monitoring.",
-  "updatedAt": "2026-10-20T03:07:37.915104456Z",
-  "requestFeedback": true,
-  "userFacing": true
-}

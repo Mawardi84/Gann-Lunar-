@@ -13,7 +13,7 @@ export const SignalTab: React.FC<SignalTabProps> = ({ state }) => {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
+      <div className="bg-slate-900/80 border border-slate-800 rounded-md p-6 shadow-xl backdrop-blur-sm space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight">Area Buy & Area Sell (Presisi Tinggi)</h2>

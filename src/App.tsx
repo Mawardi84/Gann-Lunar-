@@ -7,7 +7,7 @@ import React, { lazy, Suspense } from 'react';
 import { 
   Orbit, Sparkles, ArrowRight, BookOpen, Calculator, BarChart3, 
   Layers, Target, Gauge, Newspaper, CandlestickChart, History, 
-  FastForward, Rewind, Pin, PinOff, Eye, EyeOff, Building2, Calendar, Cpu 
+  FastForward, Rewind, Pin, PinOff, Eye, EyeOff, Building2, Calendar 
 } from 'lucide-react';
 
 import { useMarketState } from './hooks/useMarketState';
@@ -25,7 +25,6 @@ const BacktestTab = lazy(() => import('./components/tabs/BacktestTab').then(m =>
 const JournalTab = lazy(() => import('./components/tabs/JournalTab').then(m => ({ default: m.JournalTab })));
 const FundamentalTab = lazy(() => import('./components/tabs/FundamentalTab').then(m => ({ default: m.FundamentalTab })));
 const EconomicCalendarTab = lazy(() => import('./components/tabs/EconomicCalendarTab').then(m => ({ default: m.EconomicCalendarTab })));
-const FundamentalAnalysisTab = lazy(() => import('./components/tabs/FundamentalAnalysisTab').then(m => ({ default: m.FundamentalAnalysisTab })));
 
 export default function App() {
   const state = useMarketState();
@@ -54,7 +53,7 @@ export default function App() {
             onClick={() => setActiveTab('landing')}
             className="flex items-center gap-3 group text-left cursor-pointer transition-transform duration-200 active:scale-[0.98]"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 via-slate-900 to-slate-950 border border-slate-800 flex items-center justify-center text-amber-400 group-hover:border-amber-500/60 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.25)] transition-all duration-300">
+            <div className="w-10 h-10 rounded-md bg-gradient-to-br from-amber-500/20 via-slate-900 to-slate-950 border border-slate-800 flex items-center justify-center text-amber-400 group-hover:border-amber-500/60 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.25)] transition-all duration-300">
               <Orbit className="w-5 h-5 text-amber-400 group-hover:rotate-90 transition-transform duration-700 ease-out" />
             </div>
             <div className="hidden sm:block">
@@ -69,10 +68,10 @@ export default function App() {
           </button>
 
           {/* Zone 2: Navigation Links with Sleek Hover Micro-Interactions */}
-          <nav className="hidden lg:flex items-center gap-1.5 bg-slate-900/60 p-1 rounded-2xl border border-slate-800/80 backdrop-blur-md">
+          <nav className="hidden lg:flex items-center gap-1.5 bg-slate-900/60 p-1 rounded-md border border-slate-800/80 backdrop-blur-md">
             <button 
               onClick={() => setActiveTab('landing')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 (activeTab as string) === 'landing'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -84,7 +83,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('oracle')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'oracle'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -97,7 +96,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('dashboard')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'dashboard'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -110,7 +109,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('fundamental')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'fundamental'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -122,24 +121,8 @@ export default function App() {
             </button>
 
             <button 
-              onClick={() => setActiveTab('python-analysis')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'python-analysis'
-                  ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
-              }`}
-            >
-              <Cpu className="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform" />
-              <span>Python Analysis</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[9px] font-mono font-bold">
-                PY
-              </span>
-              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out pointer-events-none" />
-            </button>
-
-            <button 
               onClick={() => setActiveTab('calendar')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'calendar'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -155,7 +138,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('indicators')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'indicators'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -171,7 +154,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('signal')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'signal'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -184,7 +167,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('chart')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'chart'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -197,7 +180,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('calculator')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'calculator'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -210,7 +193,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('journal')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'journal'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -228,7 +211,7 @@ export default function App() {
 
             <button 
               onClick={() => setActiveTab('backtest')}
-              className={`relative group px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              className={`relative group px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'backtest'
                   ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700/80'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60 hover:shadow-[0_0_15px_rgba(245,158,11,0.12)] border border-transparent'
@@ -244,7 +227,7 @@ export default function App() {
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setActiveTab('oracle')}
-              className="group relative flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 rounded-xl hover:shadow-[0_0_25px_rgba(245,158,11,0.45)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 whitespace-nowrap cursor-pointer shadow-md shadow-amber-500/20"
+              className="group relative flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 rounded-md hover:shadow-[0_0_25px_rgba(245,158,11,0.45)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 whitespace-nowrap cursor-pointer shadow-md shadow-amber-500/20"
             >
               <Sparkles className="w-3.5 h-3.5 text-slate-950 group-hover:rotate-12 transition-transform" />
               <span>Buka Matriks 4D</span>
@@ -258,7 +241,7 @@ export default function App() {
       {activeTab !== 'landing' && (
         <div className="bg-slate-950 border-b border-slate-800/80 sticky top-0 z-40">
           <div className="bg-slate-950/95 border-b border-slate-900 px-4 py-2 flex items-center gap-4 overflow-hidden text-xs font-mono">
-            <div className="flex items-center gap-1.5 text-amber-400 font-bold shrink-0 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 z-10">
+            <div className="flex items-center gap-1.5 text-amber-400 font-bold shrink-0 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800 z-10">
               <span className={`w-2 h-2 rounded-full ${priceSource === 'live' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
               <span>BURSA LIVE</span>
               {priceSource === 'fallback' && (
@@ -298,7 +281,7 @@ export default function App() {
 
       {/* Floating News Ticker */}
       {isNewsTickerVisible && activeTab !== 'landing' && (
-        <div className={`${isNewsTickerPinned ? 'fixed bottom-4 left-4 right-4' : 'relative mt-4 mx-4'} z-50 bg-slate-900/90 border border-slate-700/50 rounded-xl px-4 py-2 flex items-center gap-3 text-xs font-mono text-slate-200 shadow-2xl backdrop-blur-md transition-all`}>
+        <div className={`${isNewsTickerPinned ? 'fixed bottom-4 left-4 right-4' : 'relative mt-4 mx-4'} z-50 bg-slate-900/90 border border-slate-700/50 rounded-md px-4 py-2 flex items-center gap-3 text-xs font-mono text-slate-200 shadow-2xl backdrop-blur-md transition-all`}>
           <div className="flex items-center gap-1.5 text-blue-400 font-bold shrink-0 bg-slate-950 px-2.5 py-0.5 rounded-md border border-slate-800">
             <Newspaper className="w-3 h-3 text-blue-400" />
             <span>MARKET NEWS</span>
@@ -345,19 +328,18 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobile Tab Switcher */}
         {activeTab !== 'landing' && (
-          <div className="flex lg:hidden bg-slate-900/90 p-1.5 rounded-xl mb-6 border border-slate-800 text-[11px] overflow-x-auto gap-1">
-            <button onClick={() => setActiveTab('landing')} className="px-3 py-1.5 rounded-lg text-slate-300 font-medium shrink-0">Beranda</button>
-            <button onClick={() => setActiveTab('oracle')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'oracle' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>4D Architect</button>
-            <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Market Space</button>
-            <button onClick={() => setActiveTab('fundamental')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'fundamental' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Fundamental</button>
-            <button onClick={() => setActiveTab('python-analysis')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'python-analysis' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Python Analysis</button>
-            <button onClick={() => setActiveTab('calendar')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'calendar' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Kalender</button>
-            <button onClick={() => setActiveTab('indicators')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'indicators' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Indikator</button>
-            <button onClick={() => setActiveTab('signal')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'signal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Sinyal</button>
-            <button onClick={() => setActiveTab('chart')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'chart' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Chart</button>
-            <button onClick={() => setActiveTab('calculator')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'calculator' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Kalkulator</button>
-            <button onClick={() => setActiveTab('journal')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'journal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Journal ({journalEntries.length})</button>
-            <button onClick={() => setActiveTab('backtest')} className={`px-3 py-1.5 rounded-lg shrink-0 font-medium ${activeTab === 'backtest' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Backtest</button>
+          <div className="flex lg:hidden bg-slate-900/90 p-1.5 rounded-md mb-6 border border-slate-800 text-[11px] overflow-x-auto gap-1">
+            <button onClick={() => setActiveTab('landing')} className="px-3 py-1.5 rounded-md text-slate-300 font-medium shrink-0">Beranda</button>
+            <button onClick={() => setActiveTab('oracle')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'oracle' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>4D Architect</button>
+            <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Market Space</button>
+            <button onClick={() => setActiveTab('fundamental')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'fundamental' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Fundamental</button>
+            <button onClick={() => setActiveTab('calendar')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'calendar' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Kalender</button>
+            <button onClick={() => setActiveTab('indicators')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'indicators' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Indikator</button>
+            <button onClick={() => setActiveTab('signal')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'signal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Sinyal</button>
+            <button onClick={() => setActiveTab('chart')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'chart' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Chart</button>
+            <button onClick={() => setActiveTab('calculator')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'calculator' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Kalkulator</button>
+            <button onClick={() => setActiveTab('journal')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'journal' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Journal ({journalEntries.length})</button>
+            <button onClick={() => setActiveTab('backtest')} className={`px-3 py-1.5 rounded-md shrink-0 font-medium ${activeTab === 'backtest' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300'}`}>Backtest</button>
           </div>
         )}
 
@@ -391,10 +373,6 @@ export default function App() {
 
           {activeTab === 'fundamental' && (
             <FundamentalTab state={state} />
-          )}
-
-          {activeTab === 'python-analysis' && (
-            <FundamentalAnalysisTab state={state} />
           )}
 
           {activeTab === 'calendar' && (

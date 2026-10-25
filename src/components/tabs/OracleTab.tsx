@@ -96,7 +96,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
       {/* Header Hero Banner */}
-      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-md p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -121,7 +121,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
           </div>
 
           <div className="flex flex-col items-end gap-2">
-            <div className={`px-6 py-3.5 rounded-2xl border text-center ${decisionBadgeColor} shadow-xl transition-all duration-300 ${syncGlowing ? 'scale-105 ring-2 ring-amber-400' : ''}`}>
+            <div className={`px-6 py-3.5 rounded-md border text-center ${decisionBadgeColor} shadow-xl transition-all duration-300 ${syncGlowing ? 'scale-105 ring-2 ring-amber-400' : ''}`}>
               <div className="text-[10px] uppercase font-mono tracking-wider text-slate-400">Status 4D Architect</div>
               <div className="text-2xl font-black font-mono flex items-center justify-center gap-2 mt-0.5">
                 <span>{decisionIcon}</span>
@@ -133,7 +133,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
       </div>
 
       {/* TOP PANEL: MARKET SPACE */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur-sm space-y-5">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-2xl backdrop-blur-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
@@ -227,7 +227,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
         {/* Chart Display */}
         {marketSpaceChartMode === 'simulation' && result ? (
           <div className="space-y-3">
-            <div className="h-[360px] w-full bg-slate-950/90 rounded-2xl border border-slate-800/80 p-4 relative overflow-hidden">
+            <div className="h-[360px] w-full bg-slate-950/90 rounded-md border border-slate-800/80 p-4 relative overflow-hidden">
               <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900/90 text-amber-300 border border-slate-700/80 flex items-center gap-1">
                   <CandlestickChart className="w-3 h-3 text-amber-400" />
@@ -267,7 +267,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
               onToggleStudy={handleToggleStudy}
               onSelectPreset={handleSelectStudyPreset}
             />
-            <div className="h-[380px] w-full bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+            <div className="h-[380px] w-full bg-slate-950 rounded-md border border-slate-800 overflow-hidden">
               <iframe
                 key={`oracle-${tvSymbol}-${chartInterval}-${chartStyle}-${chartTheme}-${showSideToolbar}-${chartTimezone}-${selectedStudies.join('-')}`}
                 src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_oracle_widget&symbol=${encodeURIComponent(tvSymbol)}&interval=${chartInterval}&hidesidetoolbar=${showSideToolbar ? '0' : '1'}&symboledit=1&saveimage=1&toolbarbg=${chartTheme === 'dark' ? '0f172a' : 'f8fafc'}&theme=${chartTheme}&style=${chartStyle}&timezone=${encodeURIComponent(chartTimezone)}&locale=id${studiesParam}`}
@@ -282,7 +282,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
       </div>
 
       {/* BOTTOM PANEL: 4D CALCULATOR */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-sm space-y-6">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 sm:p-8 shadow-2xl backdrop-blur-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
@@ -311,7 +311,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
 
         {/* Calculator Inputs Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-xs">
-          <div className={`p-4 rounded-2xl border transition-all ${isPivotMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
+          <div className={`p-4 rounded-md border transition-all ${isPivotMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
             <div className="flex items-center justify-between mb-2">
               <label className="text-slate-300 font-semibold flex items-center gap-1.5">
                 <span>Harga Saat Ini (Pivot)</span>
@@ -339,7 +339,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
             </div>
           </div>
 
-          <div className={`p-4 rounded-2xl border transition-all ${isHighMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
+          <div className={`p-4 rounded-md border transition-all ${isHighMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
             <div className="flex items-center justify-between mb-2">
               <label className="text-slate-300 font-semibold">Ayunan Atas (Swing High)</label>
               <span className="text-[10px] font-mono text-slate-400">TF: {(currentTimeframeLevels?.high ?? liveHigh).toLocaleString()} (24h: {liveHigh.toLocaleString()})</span>
@@ -357,7 +357,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
             <p className="text-[11px] text-slate-400 mt-2 font-mono">Titik awal ayunan gelombang TF {currentTimeframeLevels?.label ?? 'D'}</p>
           </div>
 
-          <div className={`p-4 rounded-2xl border transition-all ${isLowMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
+          <div className={`p-4 rounded-md border transition-all ${isLowMatched ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-950/20 border-amber-500/40'}`}>
             <div className="flex items-center justify-between mb-2">
               <label className="text-slate-300 font-semibold">Ayunan Bawah (Swing Low)</label>
               <span className="text-[10px] font-mono text-slate-400">TF: {(currentTimeframeLevels?.low ?? liveLow).toLocaleString()} (24h: {liveLow.toLocaleString()})</span>
@@ -375,7 +375,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
             <p className="text-[11px] text-slate-400 mt-2 font-mono">Titik akhir ayunan gelombang TF {currentTimeframeLevels?.label ?? 'D'}</p>
           </div>
 
-          <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800">
+          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800">
             <label className="block text-slate-300 font-semibold mb-2 flex items-center gap-1.5">
               <Moon className="w-4 h-4 text-indigo-400" />
               <span>Lunar Phase (Dimensi Waktu)</span>
@@ -393,7 +393,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
             <p className="text-[11px] text-indigo-400/90 mt-2 font-mono">Jendela aktif: H-2 s/d H+2 dari puncak fase</p>
           </div>
 
-          <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800">
+          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800">
             <label className="block text-slate-300 font-semibold mb-2 flex items-center gap-1.5">
               <CandlestickChart className="w-4 h-4 text-emerald-400" />
               <span>Candlestick Pattern (Psikologi Homma)</span>
@@ -412,7 +412,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
             <p className="text-[11px] text-emerald-400/90 mt-2 font-mono">Ajaran visual Munehisa Homma</p>
           </div>
 
-          <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800">
+          <div className="p-4 bg-slate-950/80 rounded-md border border-slate-800">
             <label className="block text-slate-300 font-semibold mb-2 flex items-center gap-1.5">
               <Compass className="w-4 h-4 text-amber-400" />
               <span>Sudut Vektor Pythagoras (Dimensi Ruang)</span>
@@ -435,7 +435,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
         <div className="pt-2">
           <button
             onClick={handleSynchronize4DMatrix}
-            className={`w-full py-4 px-8 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-base uppercase tracking-wider rounded-2xl shadow-[0_0_35px_rgba(245,158,11,0.55)] hover:shadow-[0_0_55px_rgba(245,158,11,0.85)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center justify-center gap-3 border border-amber-300/40 relative overflow-hidden group ${syncGlowing ? 'ring-4 ring-amber-400 ring-offset-2 ring-offset-slate-950 scale-[1.01]' : ''}`}
+            className={`w-full py-4 px-8 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-base uppercase tracking-wider rounded-md shadow-[0_0_35px_rgba(245,158,11,0.55)] hover:shadow-[0_0_55px_rgba(245,158,11,0.85)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center justify-center gap-3 border border-amber-300/40 relative overflow-hidden group ${syncGlowing ? 'ring-4 ring-amber-400 ring-offset-2 ring-offset-slate-950 scale-[1.01]' : ''}`}
           >
             <Zap className="w-5 h-5 fill-slate-950" />
             <span>Synchronize 4D Matrix</span>
@@ -445,7 +445,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
 
       {/* OUTPUT CARDS: 4 PANEL HARGA, WAKTU, RUANG, PSIKOLOGI & KEPUTUSAN EKSEKUSI */}
       {matrixSynced && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-sm space-y-6">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 sm:p-8 shadow-2xl backdrop-blur-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
@@ -609,7 +609,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
           </div>
 
           {/* KEPUTUSAN GANN-LUNAR ARCHITECT BANNER */}
-          <div className={`p-6 rounded-2xl border ${decisionBadgeColor} space-y-4 shadow-xl`}>
+          <div className={`p-6 rounded-md border ${decisionBadgeColor} space-y-4 shadow-xl`}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-current/20 pb-3">
               <span className="font-black text-lg uppercase tracking-wider text-white">
                 KEPUTUSAN GANN-LUNAR ARCHITECT:
@@ -687,7 +687,7 @@ export const OracleTab: React.FC<OracleTabProps> = ({ state }) => {
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <span>Executive AI Deep Analysis (Gemini 3.8 Flash)</span>
               </div>
-              <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 text-xs text-slate-200 whitespace-pre-line leading-relaxed font-sans shadow-inner">
+              <div className="bg-slate-950 p-5 rounded-md border border-slate-800 text-xs text-slate-200 whitespace-pre-line leading-relaxed font-sans shadow-inner">
                 {oracleAiReport}
               </div>
             </div>

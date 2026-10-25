@@ -86,7 +86,7 @@ export const TradingViewEconomicCalendar: React.FC<TradingViewEconomicCalendarPr
   }, [selectedPreset, selectedImportance, reloadKey, height]);
 
   return (
-    <div className="bg-slate-900/95 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-4">
+    <div className="bg-slate-900/95 border border-slate-800 rounded-md p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-4">
       {/* Top Filter Bar for TradingView Widget */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
@@ -186,7 +186,7 @@ export const TradingViewEconomicCalendar: React.FC<TradingViewEconomicCalendarPr
       </div>
 
       {/* Widget Container */}
-      <div className="relative rounded-2xl overflow-hidden border border-slate-800/80 bg-[#131722] min-h-[580px] w-full">
+      <div className="relative rounded-md overflow-hidden border border-slate-800/80 bg-[#131722] min-h-[580px] w-full">
         <style>{`
           .tradingview-widget-container, .tradingview-widget-container__widget, .tradingview-widget-container iframe {
             width: 100% !important;

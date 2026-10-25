@@ -36,7 +36,7 @@ export const IndicatorsTab: React.FC<IndicatorsTabProps> = ({ state }) => {
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-emerald-950/30 to-slate-900 border border-emerald-900/40 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-emerald-950/30 to-slate-900 border border-emerald-900/40 rounded-md p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -92,7 +92,7 @@ export const IndicatorsTab: React.FC<IndicatorsTabProps> = ({ state }) => {
       </div>
 
       {/* Live Chart with Studies Toolbar */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-4">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl backdrop-blur-sm space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CandlestickChart className="w-4 h-4 text-emerald-400" />

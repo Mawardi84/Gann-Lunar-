@@ -28,7 +28,7 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
+    <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl backdrop-blur-sm space-y-6">
       
       {/* Panel Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
@@ -79,7 +79,7 @@ export const TechnicalIndicatorsPanel: React.FC<TechnicalIndicatorsPanelProps> =
       </div>
 
       {/* Composite Consensus Card */}
-      <div className={`p-5 rounded-2xl border ${verdictColors[metrics.overallVerdict]} shadow-lg transition-all`}>
+      <div className={`p-5 rounded-md border ${verdictColors[metrics.overallVerdict]} shadow-lg transition-all`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">

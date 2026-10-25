@@ -168,7 +168,7 @@ export const NextMacroEventCountdown: React.FC<NextMacroEventCountdownProps> = (
           </div>
 
           {/* Right Countdown Digital Display */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center p-5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-inner space-y-2">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center p-5 rounded-md bg-slate-950/90 border border-slate-800 shadow-inner space-y-2">
             <span className="text-[11px] font-mono uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
               Hitung Mundur Waktu Rilis
@@ -197,7 +197,7 @@ export const NextMacroEventCountdown: React.FC<NextMacroEventCountdownProps> = (
         </div>
 
         {/* Gann Confluence & Volatility Advisory Banner */}
-        <div className={`p-3.5 rounded-2xl border text-xs font-mono flex items-start gap-3 transition-colors ${
+        <div className={`p-3.5 rounded-md border text-xs font-mono flex items-start gap-3 transition-colors ${
           blackout.isInWindow 
             ? 'bg-rose-950/40 border-rose-500/40 text-rose-200' 
             : 'bg-amber-950/20 border-amber-500/30 text-amber-200'

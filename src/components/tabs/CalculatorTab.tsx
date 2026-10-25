@@ -75,7 +75,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-md p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
@@ -98,7 +98,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-center shrink-0 space-y-1 w-full sm:w-auto">
+            <div className="bg-slate-900/90 border border-slate-800 rounded-md p-4 text-center shrink-0 space-y-1 w-full sm:w-auto">
               <span className="text-[10px] text-slate-400 font-mono uppercase">{assetName}</span>
               <div className="text-xl font-mono font-bold text-emerald-400">${livePrice.toLocaleString()}</div>
               <button
@@ -114,7 +114,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
       </div>
 
       {/* Control Panel: Inputs & Asset Quick Switcher */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-md space-y-6">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl backdrop-blur-md space-y-6">
         
         {/* Watchlist Quick Switcher */}
         <div className="space-y-2">
@@ -161,7 +161,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 step="any"
                 value={pivotInput}
                 onChange={(e) => setPivotInput(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-base font-mono text-white focus:outline-none focus:border-amber-400 font-bold"
+                className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-3 text-base font-mono text-white focus:outline-none focus:border-amber-400 font-bold"
                 placeholder="misal: 4164.86"
               />
               <button
@@ -188,7 +188,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 setFactorInput(newFact);
                 calculateGann(false, parseFloat(pivotInput), parseFloat(newFact));
               }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-amber-400 cursor-pointer font-bold"
+              className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-amber-400 cursor-pointer font-bold"
             >
               <option value="0.125">0.125 (45° Harmonic - Day Trading)</option>
               <option value="0.250">0.250 (90° Square Angle - Swing)</option>
@@ -202,7 +202,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
           <div className="md:col-span-3">
             <button
               onClick={() => calculateGann(false)}
-              className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-extrabold rounded-2xl transition-all cursor-pointer text-sm shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-extrabold rounded-md transition-all cursor-pointer text-sm shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
             >
               <Calculator className="w-4 h-4 text-slate-950" />
               <span>Hitung Level Gann</span>
@@ -215,7 +215,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
 
       {/* Navigation Sub-Tabs */}
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-slate-800/80 flex-wrap">
-        <div className="flex items-center bg-slate-900/90 border border-slate-800 rounded-2xl p-1 text-xs font-mono">
+        <div className="flex items-center bg-slate-900/90 border border-slate-800 rounded-md p-1 text-xs font-mono">
           <button
             onClick={() => setActiveSubTab('matrix')}
             className={`px-4 py-2 rounded-xl font-bold transition-all cursor-pointer flex items-center gap-2 ${
@@ -251,7 +251,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
         <div className="space-y-6">
           
           {/* Step-by-Step Formula Explanation Panel */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4 font-mono text-xs">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl space-y-4 font-mono text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <span className="font-bold text-white text-sm flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-400" />
@@ -261,7 +261,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-slate-950 p-4 rounded-2xl border border-rose-500/30 space-y-2">
+              <div className="bg-slate-950 p-4 rounded-md border border-rose-500/30 space-y-2">
                 <span className="text-rose-400 font-bold block">Resisten R1 (Target Bullish 45°)</span>
                 <code className="text-white block bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-[11px] overflow-x-auto">
                   {r1Step}
@@ -271,7 +271,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </p>
               </div>
 
-              <div className="bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2">
+              <div className="bg-slate-950 p-4 rounded-md border border-emerald-500/30 space-y-2">
                 <span className="text-emerald-400 font-bold block">Support S1 (Target Bearish 45°)</span>
                 <code className="text-white block bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-[11px] overflow-x-auto">
                   {s1Step}
@@ -287,7 +287,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* Resistance Column */}
-            <div className="lg:col-span-6 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+            <div className="lg:col-span-6 bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                 <h3 className="text-sm font-bold text-rose-400 flex items-center gap-2 uppercase tracking-wider">
                   <ArrowUpRight className="w-4 h-4 text-rose-400" />
@@ -298,7 +298,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
 
               <div className="space-y-3 font-mono text-xs">
                 {/* R3 */}
-                <div className="bg-slate-950 p-4 rounded-2xl border border-rose-500/40 flex items-center justify-between">
+                <div className="bg-slate-950 p-4 rounded-md border border-rose-500/40 flex items-center justify-between">
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase block">Resisten 3 (R3 - 135°)</span>
                     <strong className="text-lg text-rose-300 font-bold">${gann.res3.toFixed(decimals)}</strong>
@@ -316,7 +316,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </div>
 
                 {/* R2 */}
-                <div className="bg-slate-950 p-4 rounded-2xl border border-rose-500/30 flex items-center justify-between">
+                <div className="bg-slate-950 p-4 rounded-md border border-rose-500/30 flex items-center justify-between">
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase block">Resisten 2 (R2 - 90°)</span>
                     <strong className="text-lg text-rose-400 font-bold">${gann.res2.toFixed(decimals)}</strong>
@@ -334,7 +334,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </div>
 
                 {/* R1 */}
-                <div className="bg-slate-950 p-4 rounded-2xl border border-rose-500/20 flex items-center justify-between">
+                <div className="bg-slate-950 p-4 rounded-md border border-rose-500/20 flex items-center justify-between">
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase block">Resisten 1 (R1 - 45°)</span>
                     <strong className="text-lg text-rose-400 font-bold">${gann.res1.toFixed(decimals)}</strong>
@@ -352,7 +352,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </div>
 
                 {/* Sell Distribution Zone Banner */}
-                <div className="bg-rose-950/20 border border-rose-500/30 p-3.5 rounded-2xl text-[11px] font-mono text-rose-300 space-y-1">
+                <div className="bg-rose-950/20 border border-rose-500/30 p-3.5 rounded-md text-[11px] font-mono text-rose-300 space-y-1">
                   <span className="font-bold block">Zona Distribusi Jual (Sell Zone):</span>
                   <div>${gann.sellZoneStart.toFixed(decimals)} – ${gann.sellZoneEnd.toFixed(decimals)}</div>
                 </div>
@@ -360,7 +360,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
             </div>
 
             {/* Support Column */}
-            <div className="lg:col-span-6 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+            <div className="lg:col-span-6 bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                 <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-wider">
                   <ArrowDownRight className="w-4 h-4 text-emerald-400" />
@@ -371,7 +371,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
 
               <div className="space-y-3 font-mono text-xs">
                 {/* S1 */}
-                <div className="bg-slate-950 p-4 rounded-2xl border border-emerald-500/20 flex items-center justify-between">
+                <div className="bg-slate-950 p-4 rounded-md border border-emerald-500/20 flex items-center justify-between">
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase block">Support 1 (S1 - 45°)</span>
                     <strong className="text-lg text-emerald-400 font-bold">${gann.sup1.toFixed(decimals)}</strong>
@@ -389,7 +389,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </div>
 
                 {/* S2 */}
-                <div className="bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 flex items-center justify-between">
+                <div className="bg-slate-950 p-4 rounded-md border border-emerald-500/30 flex items-center justify-between">
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase block">Support 2 (S2 - 90°)</span>
                     <strong className="text-lg text-emerald-400 font-bold">${gann.sup2.toFixed(decimals)}</strong>
@@ -407,7 +407,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </div>
 
                 {/* S3 */}
-                <div className="bg-slate-950 p-4 rounded-2xl border border-emerald-500/40 flex items-center justify-between">
+                <div className="bg-slate-950 p-4 rounded-md border border-emerald-500/40 flex items-center justify-between">
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase block">Support 3 (S3 - 135°)</span>
                     <strong className="text-lg text-emerald-300 font-bold">${gann.sup3.toFixed(decimals)}</strong>
@@ -425,7 +425,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </div>
 
                 {/* Buy Accumulation Zone Banner */}
-                <div className="bg-emerald-950/20 border border-emerald-500/30 p-3.5 rounded-2xl text-[11px] font-mono text-emerald-300 space-y-1">
+                <div className="bg-emerald-950/20 border border-emerald-500/30 p-3.5 rounded-md text-[11px] font-mono text-emerald-300 space-y-1">
                   <span className="font-bold block">Zona Akumulasi Beli (Buy Zone):</span>
                   <div>${gann.buyZoneStart.toFixed(decimals)} – ${gann.buyZoneEnd.toFixed(decimals)}</div>
                 </div>
@@ -436,7 +436,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
           </div>
 
           {/* Fibonacci Confluence Overlay */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3 font-mono text-xs">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 shadow-xl space-y-3 font-mono text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <span className="font-bold text-white text-sm flex items-center gap-2">
                 <BarChart2 className="w-4 h-4 text-amber-400" />
@@ -468,7 +468,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
 
       {/* VIEW MODE 2: RADIAL WHEEL (SQUARE OF 9) */}
       {activeSubTab === 'wheel' && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
             <div>
               <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
@@ -480,7 +480,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
               </p>
             </div>
 
-            <div className="bg-slate-950 px-4 py-2 rounded-2xl border border-amber-500/30 font-mono text-xs text-amber-300">
+            <div className="bg-slate-950 px-4 py-2 rounded-md border border-amber-500/30 font-mono text-xs text-amber-300">
               Sudut Saat Ini: <strong className="text-white text-sm">{wheel.normalizedAngle}°</strong> ({wheel.quadrantName})
             </div>
           </div>
@@ -539,7 +539,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
 
             {/* Wheel Metrics Breakdown */}
             <div className="lg:col-span-5 space-y-4 font-mono text-xs">
-              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-2">
                 <span className="text-slate-400 text-[10px] block">Sudut Normalisasi Live</span>
                 <div className="text-2xl font-bold text-amber-300">{wheel.normalizedAngle}°</div>
                 <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
@@ -547,7 +547,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </p>
               </div>
 
-              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-2">
                 <span className="text-slate-400 text-[10px] block">Sudut Kardinal & Ordinal Terdekat</span>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-sky-400 font-bold">Kardinal: {wheel.nearestCardinalAngle}°</span>
@@ -555,7 +555,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
                 </div>
               </div>
 
-              <div className="bg-amber-950/20 border border-amber-500/30 p-4 rounded-2xl text-amber-200 text-xs font-mono space-y-1">
+              <div className="bg-amber-950/20 border border-amber-500/30 p-4 rounded-md text-amber-200 text-xs font-mono space-y-1">
                 <span className="font-bold block">Strategi Eksekusi Sudut:</span>
                 <p className="text-slate-300 font-sans text-xs leading-relaxed">
                   Sudut Kardinal (0°, 90°, 180°, 270°) beraksi sebagai dinding pertahanan harga utama. Penembusan di atas sudut ordinal 45° membuka jalur akselerasi menuju resisten berikutnya.
@@ -569,7 +569,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
 
       {/* VIEW MODE 3: RISK & POSITION SIZING */}
       {activeSubTab === 'risk' && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-slate-800">
             <div>
               <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
@@ -585,7 +585,7 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* Input Form */}
-            <div className="lg:col-span-5 bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4 font-mono text-xs">
+            <div className="lg:col-span-5 bg-slate-950 p-5 rounded-md border border-slate-800 space-y-4 font-mono text-xs">
               <div>
                 <label className="text-slate-400 block mb-1 font-bold">Saldo Modal Akun ($)</label>
                 <div className="relative">
@@ -638,13 +638,13 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
             <div className="lg:col-span-7 space-y-4 font-mono text-xs">
               
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
+                <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1">
                   <span className="text-slate-400 text-[10px]">Maksimal Toleransi Kerugian ($)</span>
                   <div className="text-2xl font-bold text-rose-400">${positionRisk.riskAmount.toLocaleString()}</div>
                   <span className="text-[10px] text-slate-500 block">{positionRisk.riskPercent}% dari ${accountBal.toLocaleString()}</span>
                 </div>
 
-                <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
+                <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1">
                   <span className="text-slate-400 text-[10px]">Rekomendasi Ukuran Lot (Lots)</span>
                   <div className="text-2xl font-bold text-emerald-400">{positionRisk.recommendedLots} Lot</div>
                   <span className="text-[10px] text-slate-500 block">Total {positionRisk.totalUnits.toLocaleString()} unit</span>
@@ -652,18 +652,18 @@ export const CalculatorTab: React.FC<CalculatorTabProps> = ({ state }) => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
+                <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1">
                   <span className="text-slate-400 text-[10px]">Jarak Risk (Point)</span>
                   <div className="text-lg font-bold text-amber-300">${positionRisk.priceRisk}</div>
                 </div>
 
-                <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
+                <div className="bg-slate-950 p-4 rounded-md border border-slate-800 space-y-1">
                   <span className="text-slate-400 text-[10px]">Rasio Risk-to-Reward (R:R)</span>
                   <div className="text-lg font-bold text-sky-400">1 : {positionRisk.riskRewardRatio}</div>
                 </div>
               </div>
 
-              <div className="bg-emerald-950/20 border border-emerald-500/30 p-4 rounded-2xl text-emerald-200 space-y-1">
+              <div className="bg-emerald-950/20 border border-emerald-500/30 p-4 rounded-md text-emerald-200 space-y-1">
                 <span className="font-bold block">Evaluasi Kedisiplinan Modal:</span>
                 <p className="text-slate-300 font-sans text-xs leading-relaxed">
                   Membuka posisi sebesar <strong>{positionRisk.recommendedLots} Lot</strong> memastikan kerugian Anda tidak akan pernah melebihi <strong>${positionRisk.riskAmount}</strong> ({positionRisk.riskPercent}%) jika harga menyentuh Stop Loss pada S1.

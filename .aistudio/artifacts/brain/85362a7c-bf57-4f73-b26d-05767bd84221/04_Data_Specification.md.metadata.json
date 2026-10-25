@@ -1,6 +1,0 @@
-{
-  "summary": "Data Specification (P03) and Data Dictionary covering FOMC, NFP, CPI/PPI, XAU/USD price response, macro context, mandatory fields, validation rules, revision handling, and pre-release consensus verification to prevent look-ahead bias.",
-  "updatedAt": "2026-10-20T02:58:27.366905538Z",
-  "requestFeedback": true,
-  "userFacing": true
-}

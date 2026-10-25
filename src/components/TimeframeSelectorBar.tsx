@@ -36,7 +36,7 @@ export const TimeframeSelectorBar: React.FC<TimeframeSelectorBarProps> = ({
   const isNearZone = entryZone?.confluenceStatus === 'NEAR_ZONE';
 
   return (
-    <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-sm space-y-3.5">
+    <div className="bg-slate-950/90 border border-slate-800 rounded-md p-4 shadow-xl backdrop-blur-sm space-y-3.5">
       {/* Top Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">

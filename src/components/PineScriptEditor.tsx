@@ -105,7 +105,7 @@ export const PineScriptEditor: React.FC<PineScriptEditorProps> = ({ tvSymbol, pi
   };
 
   return (
-    <div className="bg-slate-900/95 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-5">
+    <div className="bg-slate-900/95 border border-slate-800 rounded-md p-6 shadow-xl backdrop-blur-sm space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
