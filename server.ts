@@ -217,6 +217,85 @@ app.get('/api/market/live-prices', async (req, res) => {
   }
 });
 
+app.get('/api/calendar/nasdaq', async (req, res) => {
+  const dateStr = (req.query.date as string) || new Date().toISOString().split('T')[0];
+  try {
+    const url = `https://api.nasdaq.com/api/calendar/economicevents?date=${dateStr}`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*'
+      },
+      signal: AbortSignal.timeout(5000)
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return res.json(data);
+    }
+    return res.status(response.status).json({ error: `NASDAQ returned status ${response.status}`, data: { rows: [] } });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ error: msg, data: { rows: [] } });
+  }
+});
+
+// Cache for Cleveland Fed Inflation Nowcast (6 hours TTL)
+let clevelandFedCache: { timestamp: number; data: any } | null = null;
+const NOWCAST_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+
+app.get('/api/fundamental/nowcast-cpi', async (req, res) => {
+  const now = Date.now();
+  if (clevelandFedCache && (now - clevelandFedCache.timestamp) < NOWCAST_CACHE_TTL_MS && clevelandFedCache.data?.available) {
+    return res.json(clevelandFedCache.data);
+  }
+
+  const url = 'https://www.clevelandfed.org/indicators-and-data/inflation-nowcasting';
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Cleveland Fed returned status ${response.status} ${response.statusText}`);
+    }
+
+    const html = await response.text();
+    const { parseClevelandFedNowcastHtml } = await import('./src/utils/nowcast');
+    const parsed = parseClevelandFedNowcastHtml(html);
+    parsed.cachedAt = now;
+
+    if (parsed.available) {
+      clevelandFedCache = { timestamp: now, data: parsed };
+      return res.json(parsed);
+    }
+
+    // Honest fallback if parsing failed
+    return res.json({
+      available: false,
+      error: parsed.error || 'Nowcast tidak tersedia saat ini',
+      source: 'Federal Reserve Bank of Cleveland',
+      sourceUrl: url,
+      mom: { cpi: null, coreCpi: null, pce: null, corePce: null },
+      yoy: { cpi: null, coreCpi: null, pce: null, corePce: null },
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return res.json({
+      available: false,
+      error: `Nowcast tidak tersedia saat ini (${msg})`,
+      source: 'Federal Reserve Bank of Cleveland',
+      sourceUrl: url,
+      mom: { cpi: null, coreCpi: null, pce: null, corePce: null },
+      yoy: { cpi: null, coreCpi: null, pce: null, corePce: null },
+    });
+  }
+});
+
 app.post('/api/fundamental/analyze', async (req, res) => {
   try {
     const { eventType, indicatorName, actual, consensus, previous, unit, sourceRef } = req.body;
@@ -233,10 +312,11 @@ Analisis data rilis makroekonomi berikut secara objektif, berimbang, dan grounde
 CATATAN: Data ini adalah data historis referensi, bukan rilis real-time terbaru. Jika relevan, sebutkan dalam analisis bahwa kondisi pasar saat ini mungkin sudah bergeser sejak tanggal rilis data ini.
 
 TUGAS ANALISIS:
-1. Hitung besaran kejutan (*economic surprise*) dan arah deviasinya terhadap konsensus.
+1. Hitung besaran kejutan (*economic surprise*) atau gap deviasi terhadap konsensus pasar.
 2. Jelaskan implikasi fundamental makroekonomi terhadap instrumen XAU/USD (pertimbangkan faktor suku bunga riil, DXY, dan inflasi).
 3. Evaluasi apakah kondisi ini memicu bias \`BULLISH\`, \`BEARISH\`, \`MIXED\`, atau \`NO_CLEAR_BIAS\`.
-4. Berikan rangkuman analisis terstruktur dalam Bahasa Indonesia profesional.`;
+4. Jelaskan alasan di balik bias ini secara kualitatif. JANGAN berikan angka probabilitas spesifik (seperti '70% kemungkinan...') kecuali diminta eksplisit dan ada data pengujian yang mendasarinya — gunakan istilah seperti 'cenderung', 'berpotensi', 'secara historis arah serupa biasanya...' tanpa klaim presisi numerik yang tidak berdasar.
+5. Berikan rangkuman analisis terstruktur dalam Bahasa Indonesia profesional.`;
 
     const aiPromise = ai.models.generateContent({
       model: 'gemini-3.8-flash',

@@ -3,7 +3,15 @@ import assert from 'node:assert';
 import { INITIAL_MACRO_EVENTS, calculateEconomicSurprise } from './fundamental';
 
 test('INITIAL_MACRO_EVENTS contains accurately verified and estimated tier-1 macro events', () => {
-  assert.strictEqual(INITIAL_MACRO_EVENTS.length, 8);
+  assert.strictEqual(INITIAL_MACRO_EVENTS.length, 9);
+
+  // 0. Upcoming CPI October 2026 (Released Nov 2026, Actual null, Nowcast active)
+  const cpiUpcoming = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'cpi-2026-11');
+  assert.ok(cpiUpcoming, 'Upcoming November CPI event must exist');
+  assert.strictEqual(cpiUpcoming.actual_value, null, 'Actual value must remain null until official release');
+  assert.strictEqual(cpiUpcoming.nowcast_value, 2.48, 'Nowcast value must be populated from Cleveland Fed');
+  assert.strictEqual(cpiUpcoming.nowcast_source, 'Federal Reserve Bank of Cleveland');
+  assert.strictEqual(cpiUpcoming.data_status, 'ESTIMATED');
 
   // 1. Verified NFP March 2026 (Released April 2026)
   const nfpVerified = INITIAL_MACRO_EVENTS.find(e => e.event_id === 'nfp-2026-04');

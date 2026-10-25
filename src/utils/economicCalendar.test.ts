@@ -7,10 +7,12 @@ import {
   getEventCountdown,
   calculateSurprise,
   getGannVolatilityBlackout,
-  fetchLiveNasdaqEconomicEvents
+  fetchLiveNasdaqEconomicEvents,
+  getBusinessDayIso,
+  parseIsoTimestamp
 } from './economicCalendar';
 
-test('getInitialCalendarEvents generates expected high-impact and multi-currency events', () => {
+test('getInitialCalendarEvents generates expected high-impact and multi-currency events with 2026 benchmarks', () => {
   const events = getInitialCalendarEvents();
   assert.ok(events.length >= 10, 'Should have at least 10 initial events');
   
@@ -21,11 +23,45 @@ test('getInitialCalendarEvents generates expected high-impact and multi-currency
   assert.ok(currencies.has('IDR'), 'Should include IDR events (Bank Indonesia)');
   assert.ok(currencies.has('JPY'), 'Should include JPY events');
 
-  // Verify FOMC exists
+  // Verify FOMC exists and has 2026 benchmark figures
   const fomc = events.find(e => e.id === 'fomc-interest-rate');
   assert.ok(fomc, 'FOMC event must exist');
   assert.strictEqual(fomc?.impact, 'HIGH');
   assert.strictEqual(fomc?.currency, 'USD');
+  assert.strictEqual(fomc?.forecast, 3.75, 'FOMC forecast must be 3.75% for 2026 benchmark');
+  assert.strictEqual(fomc?.previous, 4.00, 'FOMC previous must be 4.00% for 2026 benchmark');
+
+  // Verify NFP has updated 2026 prior figures
+  const nfp = events.find(e => e.id === 'us-nonfarm-payrolls');
+  assert.ok(nfp, 'NFP event must exist');
+  assert.strictEqual(nfp?.previous, 29, 'NFP prior must reflect the 29K release');
+
+  // Verify Core CPI has updated 2026 figures
+  const cpi = events.find(e => e.id === 'us-cpi-yoy');
+  assert.ok(cpi, 'CPI event must exist');
+  assert.strictEqual(cpi?.previous, 2.6, 'CPI prior must reflect the 2.6% release');
+});
+
+test('getBusinessDayIso and upcoming events NEVER fall on Saturday or Sunday', () => {
+  // Test starting on a Saturday
+  const saturday = new Date('2026-10-24T12:00:00Z');
+  assert.strictEqual(saturday.getUTCDay(), 6, 'Should be Saturday');
+
+  const bday1 = getBusinessDayIso(saturday, 1, 14, 0);
+  const day1 = new Date(bday1).getUTCDay();
+  assert.ok(day1 !== 0 && day1 !== 6, 'Business day 1 must not be Saturday or Sunday');
+
+  const bday2 = getBusinessDayIso(saturday, 2, 18, 0);
+  const day2 = new Date(bday2).getUTCDay();
+  assert.ok(day2 !== 0 && day2 !== 6, 'Business day 2 must not be Saturday or Sunday');
+
+  // Check all generated upcoming events from saturday baseDate
+  const events = getInitialCalendarEvents(saturday);
+  const upcomingEvents = events.filter(e => e.actual === null);
+  for (const event of upcomingEvents) {
+    const dayOfWeek = new Date(event.timestamp).getUTCDay();
+    assert.ok(dayOfWeek !== 0 && dayOfWeek !== 6, `Upcoming event ${event.id} must not fall on weekend, got day ${dayOfWeek}`);
+  }
 });
 
 test('filterEconomicCalendarEvents correctly filters by currency', () => {
@@ -61,6 +97,18 @@ test('filterEconomicCalendarEvents filters by search query string', () => {
   const searchIndonesia = filterEconomicCalendarEvents(events, { searchQuery: 'indonesia' });
   assert.ok(searchIndonesia.length >= 1);
   assert.strictEqual(searchIndonesia[0].currency, 'IDR');
+});
+
+test('filterEconomicCalendarEvents correctly filters by UPCOMING and RELEASED', () => {
+  const events = getInitialCalendarEvents();
+
+  const upcomingOnly = filterEconomicCalendarEvents(events, { timeframe: 'UPCOMING' }, new Date('2026-10-24T00:00:00Z').getTime());
+  assert.ok(upcomingOnly.length > 0);
+  assert.ok(upcomingOnly.every(e => new Date(e.timestamp).getTime() >= new Date('2026-10-24T00:00:00Z').getTime()));
+
+  const releasedOnly = filterEconomicCalendarEvents(events, { timeframe: 'RELEASED' });
+  assert.ok(releasedOnly.length > 0);
+  assert.ok(releasedOnly.every(e => e.actual !== null && e.actual !== undefined));
 });
 
 test('getNextUpcomingHighImpactEvent selects the nearest future high-impact event', () => {
@@ -129,6 +177,20 @@ test('getGannVolatilityBlackout detects blackout and normal periods correctly', 
   const normal = getGannVolatilityBlackout(farEvent, nowMs);
   assert.strictEqual(normal.isInWindow, false);
   assert.strictEqual(normal.status, 'NORMAL');
+});
+
+test('parseIsoTimestamp parses HH:MM and AM/PM strings into valid ISO format', () => {
+  const ts1 = parseIsoTimestamp('2026-10-24', '14:30');
+  assert.strictEqual(ts1, '2026-10-24T14:30:00Z');
+
+  const ts2 = parseIsoTimestamp('2026-10-24', '8:30 AM');
+  assert.strictEqual(ts2, '2026-10-24T08:30:00Z');
+
+  const ts3 = parseIsoTimestamp('2026-10-24', '1:30 PM');
+  assert.strictEqual(ts3, '2026-10-24T13:30:00Z');
+
+  const ts4 = parseIsoTimestamp('2026-10-24', null);
+  assert.strictEqual(ts4, '2026-10-24T12:00:00Z');
 });
 
 test('fetchLiveNasdaqEconomicEvents handles online live data or graceful fallback', async () => {

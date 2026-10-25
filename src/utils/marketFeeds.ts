@@ -6,6 +6,8 @@
  * - Forex: EUR/USD, GBP/USD, USD/JPY, AUD/USD via open exchange rates API
  */
 
+import { auditTrail } from './auditTrail';
+
 export interface MarketPriceResult {
   price: number;
   high: number;
@@ -19,6 +21,7 @@ export async function fetchDirectLiveMarketPrices(): Promise<Record<string, Mark
 
   // 1. Fetch Metals (Gold & Silver)
   try {
+    const goldStart = Date.now();
     const [goldRes, silverRes] = await Promise.allSettled([
       fetch('https://api.gold-api.com/price/XAU', { headers: { 'Accept': 'application/json' } }),
       fetch('https://api.gold-api.com/price/XAG', { headers: { 'Accept': 'application/json' } }),
@@ -51,6 +54,24 @@ export async function fetchDirectLiveMarketPrices(): Promise<Record<string, Mark
         };
       }
     }
+
+    const goldDuration = Date.now() - goldStart;
+    auditTrail.logFetchAttempt({
+      sourceUri: 'https://api.gold-api.com/price/XAU',
+      httpMethod: 'GET',
+      status: goldRes.status === 'fulfilled' && goldRes.value.ok ? 'SUCCESS' : 'FAILURE',
+      statusCode: goldRes.status === 'fulfilled' ? goldRes.value.status : 500,
+      durationMs: goldDuration,
+      domain: 'MARKET_FEED',
+      institution: 'Gold-API Physical Metal Markets',
+      sourceName: 'Gold-API (XAU/USD Spot)',
+      indicatorCode: 'XAU_USD_SPOT',
+      retrievalMethod: 'HTTPS REST Ingestion',
+      dataStatus: 'VERIFIED',
+      revisionVersion: 1,
+      rawPayload: results['XAU/USD'] || null,
+      callerContext: 'fetchDirectLiveMarketPrices:metals',
+    });
   } catch (err) {
     console.warn('Direct metals feed error:', err);
   }

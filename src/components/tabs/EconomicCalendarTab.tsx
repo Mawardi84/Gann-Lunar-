@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Calendar, Globe2, Clock, Search, Filter, ShieldCheck, Flame, 
   ExternalLink, Layers, ArrowUpRight, ArrowDownRight, Compass, 
-  Sparkles, RefreshCw, BarChart2, Eye, Info, X, Zap 
+  Sparkles, RefreshCw, BarChart2, Eye, Info, X, Zap, Activity 
 } from 'lucide-react';
 import { MarketState } from '../../hooks/useMarketState';
 import { 
@@ -17,8 +17,43 @@ import {
   EconomicImpact, 
   CalendarFilterOptions 
 } from '../../utils/economicCalendar';
+import { 
+  calculateNowcastMarketBias, 
+  CLEVELAND_FED_TOOLTIP, 
+  NOWCAST_DISCLAIMER, 
+  MACRO_GOLD_LOGIC, 
+  NON_CPI_NOWCAST_NOTICE, 
+  fetchLiveClevelandFedNowcast,
+  getNowcastSparklinePoints
+} from '../../utils/nowcast';
+
+const renderSparklineSvg = (points: number[]) => {
+  const min = Math.min(...points);
+  const max = Math.max(...points);
+  const range = max - min || 1;
+  const w = 48;
+  const h = 14;
+  const pts = points.map((p, idx) => {
+    const x = (idx / (points.length - 1 || 1)) * w;
+    const y = h - ((p - min) / range) * (h - 4) - 2;
+    return `${x},${isNaN(y) ? h / 2 : y}`;
+  }).join(' ');
+
+  return (
+    <svg width={w} height={h} className="inline-block overflow-visible my-0.5" title="Tren Nowcast 3 Bulan Terakhir">
+      <polyline fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+      {points.map((p, idx) => {
+        const x = (idx / (points.length - 1 || 1)) * w;
+        const y = h - ((p - min) / range) * (h - 4) - 2;
+        return <circle key={idx} cx={isNaN(x) ? 0 : x} cy={isNaN(y) ? h / 2 : y} r="1.5" fill="#f59e0b" />;
+      })}
+    </svg>
+  );
+};
+
 import { TradingViewEconomicCalendar } from '../TradingViewEconomicCalendar';
 import { NextMacroEventCountdown } from '../NextMacroEventCountdown';
+import { AuditInfoOverlay, AuditInfoRecord } from '../AuditInfoOverlay';
 
 interface EconomicCalendarTabProps {
   state: MarketState;
@@ -33,12 +68,40 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
   // Filter states
   const [selectedCurrency, setSelectedCurrency] = useState<EconomicCurrency | 'ALL'>('ALL');
   const [selectedImpact, setSelectedImpact] = useState<EconomicImpact | 'ALL' | 'HIGH_MEDIUM'>('ALL');
-  const [selectedTimeframe, setSelectedTimeframe] = useState<'TODAY' | 'TOMORROW' | 'THIS_WEEK' | 'ALL'>('ALL');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<'TODAY' | 'TOMORROW' | 'THIS_WEEK' | 'UPCOMING' | 'RELEASED' | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Selected event for deep analysis modal
   const [modalEvent, setModalEvent] = useState<EconomicCalendarEvent | null>(null);
   const [simulatedActual, setSimulatedActual] = useState<string>('');
+
+  // Audit Info Overlay state
+  const [auditRecord, setAuditRecord] = useState<AuditInfoRecord | null>(null);
+  const [isAuditOpen, setIsAuditOpen] = useState<boolean>(false);
+
+  const openAuditOverlay = (event: EconomicCalendarEvent) => {
+    setAuditRecord({
+      event_id: event.id,
+      indicator_name: event.title,
+      indicator_code: `${event.currency}_${event.impact}`,
+      event_type: event.currency,
+      reporting_period: event.period,
+      actual_value: event.actual !== undefined && event.actual !== null ? event.actual : null,
+      consensus_value: event.forecast !== undefined && event.forecast !== null ? event.forecast : null,
+      previous_value: event.previous !== undefined && event.previous !== null ? event.previous : null,
+      revised_previous: event.revisedPrevious ?? event.previous ?? null,
+      nowcast_value: event.nowcast_value,
+      nowcast_source: event.nowcast_source,
+      nowcast_asof: event.nowcast_asof,
+      unit: event.unit,
+      release_time_utc: event.timestamp,
+      source_name: event.sourceAgency || 'National Statistical Office / Central Bank',
+      source_reference: event.sourceUrl || 'https://www.nasdaq.com/market-activity/economic-calendar',
+      data_status: event.actual !== null && event.actual !== undefined ? 'VERIFIED' : 'ESTIMATED',
+      revision_version: event.revisionVersion || 1,
+    });
+    setIsAuditOpen(true);
+  };
 
   // All economic events with relative timestamps and live NASDAQ integration
   const [events, setEvents] = useState<EconomicCalendarEvent[]>(() => getInitialCalendarEvents());
@@ -69,8 +132,33 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     handleFetchLiveEvents();
+    // Also hydrate live Cleveland Fed Nowcast for CPI events
+    fetchLiveClevelandFedNowcast().then(nowcastRes => {
+      if (nowcastRes && nowcastRes.available) {
+        setEvents(prev => prev.map(ev => {
+          const isCPI = ev.indicatorCode === 'CPI' || ev.title.toLowerCase().includes('cpi');
+          if (isCPI) {
+            const isMom = ev.title.toLowerCase().includes('mom') || ev.title.toLowerCase().includes('month');
+            const isCore = ev.title.toLowerCase().includes('core');
+            let val: number | null = null;
+            if (isMom) {
+              val = isCore ? nowcastRes.mom.coreCpi : nowcastRes.mom.cpi;
+            } else {
+              val = isCore ? nowcastRes.yoy.coreCpi : nowcastRes.yoy.cpi;
+            }
+            return {
+              ...ev,
+              nowcast_value: val ?? ev.nowcast_value,
+              nowcast_source: nowcastRes.source,
+              nowcast_asof: nowcastRes.asOf ?? ev.nowcast_asof
+            };
+          }
+          return ev;
+        }));
+      }
+    });
   }, []);
 
   // Filtered events
@@ -130,6 +218,14 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
               >
                 <RefreshCw className={`w-3 h-3 text-emerald-400 ${isLiveFetching ? 'animate-spin' : ''}`} />
                 <span>{isLiveFetching ? 'Menyinkronkan...' : 'Refresh Live Bursa'}</span>
+              </button>
+              <button
+                onClick={() => setEvents(getInitialCalendarEvents())}
+                className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[11px] font-mono flex items-center gap-1.5 transition-all cursor-pointer"
+                title="Muat ulang data resmi standar 2026 yang terverifikasi"
+              >
+                <ShieldCheck className="w-3 h-3 text-amber-400" />
+                <span>Standar Resmi 2026</span>
               </button>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
@@ -295,7 +391,7 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
 
               <div className="flex items-center gap-2">
                 <span className="text-slate-400 text-[11px]">Waktu:</span>
-                <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <div className="flex flex-wrap items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
                   <button
                     onClick={() => setSelectedTimeframe('ALL')}
                     className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
@@ -303,6 +399,30 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
                     }`}
                   >
                     Semua
+                  </button>
+                  <button
+                    onClick={() => setSelectedTimeframe('UPCOMING')}
+                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                      selectedTimeframe === 'UPCOMING' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    🟢 Mendatang
+                  </button>
+                  <button
+                    onClick={() => setSelectedTimeframe('RELEASED')}
+                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                      selectedTimeframe === 'RELEASED' ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    🔵 Telah Dirilis
+                  </button>
+                  <button
+                    onClick={() => setSelectedTimeframe('THIS_WEEK')}
+                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                      selectedTimeframe === 'THIS_WEEK' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Minggu Ini
                   </button>
                   <button
                     onClick={() => setSelectedTimeframe('TODAY')}
@@ -320,19 +440,14 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
                   >
                     Besok
                   </button>
-                  <button
-                    onClick={() => setSelectedTimeframe('THIS_WEEK')}
-                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                      selectedTimeframe === 'THIS_WEEK' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Minggu Ini
-                  </button>
                 </div>
               </div>
 
-              <div className="text-slate-400 text-[11px]">
-                Menampilkan <strong className="text-white">{filteredEvents.length}</strong> rilis acara
+              <div className="text-slate-400 text-[11px] flex items-center gap-2">
+                <span>Menampilkan <strong className="text-white">{filteredEvents.length}</strong> rilis acara</span>
+                <span className="text-slate-600">|</span>
+                <span className="text-emerald-400 font-mono text-[10px]">{events.filter(e => e.actual === null).length} Terjadwal</span>
+                <span className="text-sky-400 font-mono text-[10px]">{events.filter(e => e.actual !== null).length} Historis</span>
               </div>
             </div>
 
@@ -390,27 +505,85 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
                     </span>
                   </div>
 
-                  {/* Metrics: Actual vs Forecast vs Previous */}
-                  <div className="grid grid-cols-3 gap-2 bg-slate-950/90 p-3 rounded-xl border border-slate-800/80 text-xs font-mono">
-                    <div>
-                      <span className="text-[10px] text-slate-400 block">Aktual</span>
-                      <span className={`font-bold ${event.actual !== null && event.actual !== undefined ? 'text-emerald-400' : 'text-slate-500'}`}>
-                        {event.actual !== null && event.actual !== undefined ? `${event.actual} ${event.unit}` : 'Menunggu'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 block">Konsensus</span>
-                      <span className="text-amber-300 font-bold">
-                        {event.forecast !== null && event.forecast !== undefined ? `${event.forecast} ${event.unit}` : 'N/A'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 block">Sebelumnya</span>
-                      <span className="text-slate-300 font-bold">
-                        {event.previous !== null && event.previous !== undefined ? `${event.previous} ${event.unit}` : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
+                  {/* Metrics: 4 Columns: Previous, Forecast, Nowcast, Actual */}
+                  {(() => {
+                    const isCPI = event.indicatorCode === 'CPI' || event.title.toLowerCase().includes('cpi');
+                    const biasResult = isCPI ? calculateNowcastMarketBias(event.nowcast_value, event.forecast) : null;
+                    return (
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-4 gap-1.5 bg-slate-950/90 p-2 rounded-xl border border-slate-800/80 text-xs font-mono">
+                          {/* Previous (abu-abu/netral) */}
+                          <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800/60">
+                            <span className="text-[9px] text-slate-400 block uppercase font-sans">Previous</span>
+                            <span className="text-slate-300 font-bold block tabular-nums text-xs mt-0.5">
+                              {event.previous !== null && event.previous !== undefined ? `${event.previous}${event.unit}` : '-'}
+                            </span>
+                          </div>
+
+                          {/* Forecast (biru, label "Konsensus Pasar") */}
+                          <div className="bg-sky-950/25 p-2 rounded-lg border border-sky-500/25">
+                            <span className="text-[9px] text-sky-400 block uppercase font-sans">Forecast</span>
+                            <span className="text-sky-400 font-bold block tabular-nums text-xs mt-0.5" title="Konsensus Pasar">
+                              {event.forecast !== null && event.forecast !== undefined ? `${event.forecast}${event.unit}` : '-'}
+                            </span>
+                          </div>
+
+                          {/* Nowcast (amber/kuning, label "Estimasi Cleveland Fed — bukan rilis resmi") */}
+                          <div 
+                            className={`p-2 rounded-lg border relative ${
+                              isCPI ? 'bg-amber-950/30 border-amber-500/40 text-amber-300' : 'bg-slate-900/40 border-slate-800/60 text-slate-500'
+                            }`}
+                            title={isCPI ? CLEVELAND_FED_TOOLTIP : NON_CPI_NOWCAST_NOTICE}
+                          >
+                            <span className="text-[9px] flex items-center gap-1 uppercase font-sans">
+                              <span>Nowcast</span>
+                              {isCPI && <Info className="w-2.5 h-2.5 text-amber-400 inline" />}
+                            </span>
+                            <span className="font-bold block tabular-nums text-xs mt-0.5">
+                              {isCPI 
+                                ? (
+                                    <div className="flex items-center justify-between gap-1">
+                                      <span>{event.nowcast_value !== null && event.nowcast_value !== undefined ? `${event.nowcast_value}${event.unit}` : 'N/A'}</span>
+                                      {renderSparklineSvg(getNowcastSparklinePoints(event))}
+                                    </div>
+                                  )
+                                : '-'}
+                            </span>
+                          </div>
+
+                          {/* Actual (hijau/merah tegas, tetap "-" sampai rilis resmi, TIDAK PERNAH diisi otomatis) */}
+                          <div className={`p-2 rounded-lg border ${
+                            event.actual !== null && event.actual !== undefined
+                              ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-400'
+                              : 'bg-slate-900/40 border-slate-800/60 text-slate-500'
+                          }`}>
+                            <span className="text-[9px] block uppercase font-sans">Actual</span>
+                            <span className="font-extrabold block tabular-nums text-xs mt-0.5">
+                              {event.actual !== null && event.actual !== undefined ? `${event.actual}${event.unit}` : '-'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Qualitative Market Bias Banner for CPI events */}
+                        {isCPI && biasResult && biasResult.bias !== 'UNKNOWN' && (
+                          <div 
+                            className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-mono flex items-center justify-between gap-2 ${biasResult.badgeColor}`}
+                            title={biasResult.detail + '\n' + biasResult.disclaimer}
+                          >
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <Activity className="w-3.5 h-3.5 shrink-0" />
+                              <span className="font-bold truncate">{biasResult.label}</span>
+                            </div>
+                            {biasResult.gap !== null && (
+                              <span className="text-[10px] opacity-80 shrink-0 font-bold">
+                                Gap: {biasResult.gap > 0 ? `+${biasResult.gap.toFixed(2)}` : biasResult.gap.toFixed(2)}%
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Surprise Badge & Countdown Status */}
                   <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs font-mono">
@@ -439,7 +612,19 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
                       )}
                     </div>
 
-                    <div className="text-[11px]">
+                    <div className="flex items-center gap-2 text-[11px]">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openAuditOverlay(event);
+                        }}
+                        className="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-950 hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 text-[10px] font-mono transition-all cursor-pointer"
+                        title="Buka Audit Info Overlay"
+                      >
+                        <ShieldCheck className="w-3 h-3 text-amber-400" />
+                        <span>Audit</span>
+                      </button>
+
                       {countdown.isPast ? (
                         <span className="text-emerald-400 font-bold flex items-center gap-1">
                           <ShieldCheck className="w-3.5 h-3.5" />
@@ -462,20 +647,30 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
             <div className="p-12 text-center bg-slate-900/60 border border-slate-800 rounded-3xl space-y-3">
               <Calendar className="w-8 h-8 text-slate-500 mx-auto" />
               <h3 className="text-sm font-bold text-white">Tidak ada data rilis acara yang cocok</h3>
-              <p className="text-xs text-slate-400 font-mono">
-                Coba sesuaikan filter mata uang, tingkat dampak, atau kata kunci pencarian Anda.
+              <p className="text-xs text-slate-400 font-mono max-w-md mx-auto leading-relaxed">
+                {selectedTimeframe === 'TODAY' && (new Date().getUTCDay() === 0 || new Date().getUTCDay() === 6)
+                  ? 'Hari ini adalah akhir pekan (Sabtu/Minggu). Lembaga statistik resmi (BLS, Fed, ECB, BI) dan bursa dunia libur. Silakan pilih tab "🟢 Mendatang" atau "🔵 Telah Dirilis" di atas.'
+                  : 'Coba sesuaikan filter mata uang, tingkat dampak, atau kata kunci pencarian Anda.'}
               </p>
-              <button
-                onClick={() => {
-                  setSelectedCurrency('ALL');
-                  setSelectedImpact('ALL');
-                  setSelectedTimeframe('ALL');
-                  setSearchQuery('');
-                }}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer"
-              >
-                Reset Filter
-              </button>
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <button
+                  onClick={() => {
+                    setSelectedCurrency('ALL');
+                    setSelectedImpact('ALL');
+                    setSelectedTimeframe('ALL');
+                    setSearchQuery('');
+                  }}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer"
+                >
+                  Reset Filter
+                </button>
+                <button
+                  onClick={() => setEvents(getInitialCalendarEvents())}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer"
+                >
+                  Muat Ulang Standar Resmi 2026
+                </button>
+              </div>
             </div>
           )}
 
@@ -504,12 +699,22 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
                 <h3 className="text-lg font-bold text-white tracking-tight">{modalEvent.title}</h3>
                 <span className="text-xs text-slate-400 font-mono">{modalEvent.period} · {modalEvent.sourceAgency}</span>
               </div>
-              <button
-                onClick={() => setModalEvent(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => openAuditOverlay(modalEvent)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-mono font-bold rounded-xl border border-amber-500/40 transition-all cursor-pointer shadow-sm"
+                  title="Buka Audit Info Overlay"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Audit Info</span>
+                </button>
+                <button
+                  onClick={() => setModalEvent(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Description */}
@@ -517,27 +722,124 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
               {modalEvent.description}
             </div>
 
-            {/* Metrics Breakdown */}
-            <div className="grid grid-cols-3 gap-3 text-xs font-mono">
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-slate-400 text-[10px]">Nilai Aktual</span>
-                <div className="text-base font-bold text-emerald-400">
-                  {modalEvent.actual !== null && modalEvent.actual !== undefined ? `${modalEvent.actual} ${modalEvent.unit}` : 'Belum Dirilis'}
+            {/* Metrics Breakdown: 4 Distinct Columns */}
+            {(() => {
+              const isCPI = modalEvent.indicatorCode === 'CPI' || modalEvent.title.toLowerCase().includes('cpi');
+              const biasResult = isCPI ? calculateNowcastMarketBias(modalEvent.nowcast_value, modalEvent.forecast) : null;
+              return (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                    {/* Previous */}
+                    <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+                      <span className="text-slate-400 text-[10px]">Previous (Seb.)</span>
+                      <div className="text-base font-bold text-slate-200 tabular-nums">
+                        {modalEvent.previous !== null && modalEvent.previous !== undefined ? `${modalEvent.previous} ${modalEvent.unit}` : 'N/A'}
+                      </div>
+                      <span className="text-[9px] text-slate-500 block">Vintage Data</span>
+                    </div>
+
+                    {/* Forecast */}
+                    <div className="bg-sky-950/20 p-3.5 rounded-xl border border-sky-500/30 space-y-1">
+                      <span className="text-sky-300 text-[10px] font-semibold">Forecast (Konsensus)</span>
+                      <div className="text-base font-bold text-sky-400 tabular-nums">
+                        {modalEvent.forecast !== null && modalEvent.forecast !== undefined ? `${modalEvent.forecast} ${modalEvent.unit}` : 'N/A'}
+                      </div>
+                      <span className="text-[9px] text-sky-400/70 block">Konsensus Pasar</span>
+                    </div>
+
+                    {/* Nowcast */}
+                    <div 
+                      className={`p-3.5 rounded-xl border space-y-1 relative ${
+                        isCPI ? 'bg-amber-950/25 border-amber-500/40' : 'bg-slate-950 border-slate-800 text-slate-500'
+                      }`}
+                      title={isCPI ? CLEVELAND_FED_TOOLTIP : NON_CPI_NOWCAST_NOTICE}
+                    >
+                      <span className="text-amber-300 text-[10px] font-semibold flex items-center gap-1">
+                        <span>Nowcast (Fed)</span>
+                        {isCPI && <Info className="w-3 h-3 text-amber-400 inline" />}
+                      </span>
+                      <div className="text-base font-bold text-amber-300 tabular-nums">
+                        {isCPI 
+                          ? (modalEvent.nowcast_value !== null && modalEvent.nowcast_value !== undefined ? `${modalEvent.nowcast_value} ${modalEvent.unit}` : 'Tidak tersedia')
+                          : '-'}
+                      </div>
+                      <span className="text-[9px] text-amber-400/80 block truncate">
+                        {isCPI ? `Estimasi Cleveland Fed (${modalEvent.nowcast_asof || 'Live'})` : 'Belum ada model'}
+                      </span>
+                    </div>
+
+                    {/* Actual */}
+                    <div className={`p-3.5 rounded-xl border space-y-1 ${
+                      modalEvent.actual !== null && modalEvent.actual !== undefined
+                        ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-400'
+                        : 'bg-slate-950 border-slate-800 text-slate-500'
+                    }`}>
+                      <span className="text-[10px] font-semibold text-slate-400">Actual (Resmi)</span>
+                      <div className="text-base font-extrabold tabular-nums">
+                        {modalEvent.actual !== null && modalEvent.actual !== undefined ? `${modalEvent.actual} ${modalEvent.unit}` : '-'}
+                      </div>
+                      <span className="text-[9px] block">
+                        {modalEvent.actual !== null && modalEvent.actual !== undefined ? 'Rilis Resmi Terverifikasi' : 'Menunggu Rilis'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Market Bias Banner for CPI events */}
+                  {isCPI && biasResult && biasResult.bias !== 'UNKNOWN' && (
+                    <div className="bg-slate-950 p-4 rounded-2xl border border-amber-500/30 space-y-3 font-mono">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-800">
+                        <div className="flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-amber-400" />
+                          <h5 className="text-xs font-bold text-white uppercase tracking-wider">
+                            Bias Arah Pasar XAU/USD (Rule-Based Nowcast Gap)
+                          </h5>
+                        </div>
+                        <span className={`px-2.5 py-1 rounded text-xs font-bold border ${biasResult.badgeColor}`}>
+                          {biasResult.label}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800/80">
+                          <span className="text-[10px] text-slate-400 block mb-0.5">Gap (Nowcast − Konsensus):</span>
+                          <div className="text-base font-bold text-white tabular-nums">
+                            {biasResult.gap !== null ? (
+                              <span className={biasResult.gap > 0 ? 'text-amber-400' : (biasResult.gap < 0 ? 'text-emerald-400' : 'text-slate-300')}>
+                                {biasResult.gap > 0 ? `+${biasResult.gap.toFixed(2)}` : biasResult.gap.toFixed(2)}% poin
+                              </span>
+                            ) : 'N/A'}
+                          </div>
+                          <span className="text-[9px] text-slate-500 mt-1 block">
+                            Nowcast: {modalEvent.nowcast_value ?? 'N/A'}% vs Konsensus: {modalEvent.forecast ?? 'N/A'}%
+                          </span>
+                        </div>
+
+                        <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800/80 md:col-span-2">
+                          <span className="text-[10px] text-slate-400 block mb-0.5">Logika Transmisi Makro ke Emas:</span>
+                          <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
+                            {MACRO_GOLD_LOGIC}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300/90 font-sans flex items-start gap-2">
+                        <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>Disclaimer:</strong> {NOWCAST_DISCLAIMER}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!isCPI && (
+                    <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-xs font-mono text-slate-400 flex items-center gap-2">
+                      <Info className="w-4 h-4 text-slate-500 shrink-0" />
+                      <span className="text-[11px]">{NON_CPI_NOWCAST_NOTICE}</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-slate-400 text-[10px]">Konsensus</span>
-                <div className="text-base font-bold text-amber-300">
-                  {modalEvent.forecast !== null && modalEvent.forecast !== undefined ? `${modalEvent.forecast} ${modalEvent.unit}` : 'N/A'}
-                </div>
-              </div>
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-slate-400 text-[10px]">Sebelumnya</span>
-                <div className="text-base font-bold text-white">
-                  {modalEvent.previous !== null && modalEvent.previous !== undefined ? `${modalEvent.previous} ${modalEvent.unit}` : 'N/A'}
-                </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* Interactive Surprise Simulator */}
             <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
@@ -625,6 +927,13 @@ export const EconomicCalendarTab: React.FC<EconomicCalendarTabProps> = ({ state 
           </div>
         </div>
       )}
+
+      {/* Audit Info Modal / Overlay */}
+      <AuditInfoOverlay
+        isOpen={isAuditOpen}
+        onClose={() => setIsAuditOpen(false)}
+        record={auditRecord}
+      />
 
     </div>
   );

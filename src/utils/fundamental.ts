@@ -13,6 +13,9 @@ export interface MacroEventRecord {
   consensus_value: number | null;
   previous_value: number | null;
   revised_previous: number | null;
+  nowcast_value?: number | null;
+  nowcast_source?: string;
+  nowcast_asof?: string;
   unit: string;
   release_time_utc: string;
   source_name: string;
@@ -23,6 +26,26 @@ export interface MacroEventRecord {
 }
 
 export const INITIAL_MACRO_EVENTS: MacroEventRecord[] = [
+  {
+    event_id: 'cpi-2026-11',
+    event_type: 'CPI',
+    indicator_code: 'CORE_CPI_YOY',
+    indicator_name: 'Core Consumer Price Index (YoY - Oktober)',
+    reporting_period: 'Oktober 2026',
+    actual_value: null, // TETAP null sampai rilis resmi berlangsung
+    consensus_value: 2.5,
+    previous_value: 2.6,
+    revised_previous: 2.6,
+    nowcast_value: 2.48,
+    nowcast_source: 'Federal Reserve Bank of Cleveland',
+    nowcast_asof: '10/23',
+    unit: '%',
+    release_time_utc: '2026-11-12T13:30:00Z',
+    source_name: 'U.S. Bureau of Labor Statistics (BLS)',
+    source_reference: 'https://www.bls.gov/cpi/',
+    data_status: 'ESTIMATED',
+    revision_version: 1
+  },
   {
     event_id: 'ppi-2026-10',
     event_type: 'PPI',
@@ -50,11 +73,14 @@ export const INITIAL_MACRO_EVENTS: MacroEventRecord[] = [
     consensus_value: 2.6,
     previous_value: 2.5,
     revised_previous: 2.5,
+    nowcast_value: 2.48,
+    nowcast_source: 'Federal Reserve Bank of Cleveland',
+    nowcast_asof: '10/23',
     unit: '%',
     release_time_utc: '2026-10-14T12:30:00Z',
     source_name: 'U.S. Bureau of Labor Statistics (BLS)',
     source_reference: 'https://www.bls.gov/cpi/',
-    data_status: 'ESTIMATED',
+    data_status: 'VERIFIED',
     revision_version: 1
   },
   {
@@ -191,4 +217,20 @@ export function calculateEconomicSurprise(actual: number | null, consensus: numb
     status: 'VERIFIED' as const,
     discreteAssessment: null
   };
+}
+
+/**
+ * QMAE Strict Guardrail: Ensures actual_value is never populated by nowcast
+ * and non-CPI events never receive unauthorized nowcasts.
+ */
+export function validateMacroEventRecord(record: MacroEventRecord): { valid: boolean; error?: string } {
+  if (record.nowcast_value !== null && record.nowcast_value !== undefined && record.actual_value !== null && record.actual_value === record.nowcast_value) {
+    return { valid: false, error: 'VIOLATION: actual_value cannot be populated by nowcast_value!' };
+  }
+
+  if (record.event_type !== 'CPI' && record.nowcast_value !== null && record.nowcast_value !== undefined) {
+    return { valid: false, error: `VIOLATION: Event type ${record.event_type} cannot have nowcast_value!` };
+  }
+
+  return { valid: true };
 }

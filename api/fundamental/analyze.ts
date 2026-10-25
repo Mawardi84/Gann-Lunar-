@@ -23,10 +23,11 @@ Analisis data rilis makroekonomi berikut secara objektif, berimbang, dan grounde
 CATATAN: Data ini adalah data historis referensi, bukan rilis real-time terbaru. Jika relevan, sebutkan dalam analisis bahwa kondisi pasar saat ini mungkin sudah bergeser sejak tanggal rilis data ini.
 
 TUGAS ANALISIS:
-1. Hitung besaran kejutan (*economic surprise*) dan arah deviasinya terhadap konsensus.
+1. Hitung besaran kejutan (*economic surprise*) atau gap deviasi terhadap konsensus pasar.
 2. Jelaskan implikasi fundamental makroekonomi terhadap instrumen XAU/USD (pertimbangkan faktor suku bunga riil, DXY, dan inflasi).
 3. Evaluasi apakah kondisi ini memicu bias \`BULLISH\`, \`BEARISH\`, \`MIXED\`, atau \`NO_CLEAR_BIAS\`.
-4. Berikan rangkuman analisis terstruktur dalam Bahasa Indonesia profesional.`;
+4. Jelaskan alasan di balik bias ini secara kualitatif. JANGAN berikan angka probabilitas spesifik (seperti '70% kemungkinan...') kecuali diminta eksplisit dan ada data pengujian yang mendasarinya — gunakan istilah seperti 'cenderung', 'berpotensi', 'secara historis arah serupa biasanya...' tanpa klaim presisi numerik yang tidak berdasar.
+5. Berikan rangkuman analisis terstruktur dalam Bahasa Indonesia profesional.`;
 
     const ai = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY || '',
