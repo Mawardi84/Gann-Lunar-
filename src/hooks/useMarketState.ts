@@ -288,14 +288,17 @@ export function useMarketState() {
           backendFailed = true;
         }
 
-        // Step 2: Fallback to direct client-side open market feeds if backend fails or returns fallback
-        if (!priceMap || Object.values(priceMap).every(p => p.source === 'fallback')) {
-          console.log('Backend failed or returned stale data. Fetching direct market feeds...');
+        // Step 2: Fallback or overlay with direct client-side open market feeds if backend fails or returns any fallback data
+        if (!priceMap || Object.values(priceMap).some(p => p.source === 'fallback')) {
           try {
             const direct = await fetchDirectLiveMarketPrices();
-            if (Object.keys(direct).length > 0) {
-              priceMap = { ...(priceMap || {}), ...direct };
-              console.log('Direct market prices received:', priceMap);
+            if (direct && Object.keys(direct).length > 0) {
+              priceMap = priceMap || {};
+              for (const [sym, data] of Object.entries(direct)) {
+                if (!priceMap[sym] || priceMap[sym].source === 'fallback' || data.source === 'live') {
+                  priceMap[sym] = data;
+                }
+              }
             }
           } catch (e) {
             console.warn('Direct live market feed error:', e);

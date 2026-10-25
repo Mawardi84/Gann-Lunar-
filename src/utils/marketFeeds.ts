@@ -79,7 +79,11 @@ export async function fetchDirectLiveMarketPrices(): Promise<Record<string, Mark
   // 2. Fetch Cryptocurrencies via Binance 24hr Ticker API
   try {
     const cryptoSymbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT'];
-    const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(cryptoSymbols))}`);
+    const query = `symbols=${encodeURIComponent(JSON.stringify(cryptoSymbols))}`;
+    let res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?${query}`);
+    if (!res.ok) {
+      res = await fetch(`https://data-api.binance.vision/api/v3/ticker/24hr?${query}`);
+    }
     if (res.ok) {
       const list = await res.json();
       if (Array.isArray(list)) {
@@ -92,7 +96,7 @@ export async function fetchDirectLiveMarketPrices(): Promise<Record<string, Mark
         };
         for (const item of list) {
           const symName = mapping[item.symbol];
-          if (symName) {
+          if (symName && item.lastPrice) {
             results[symName] = {
               price: parseFloat(item.lastPrice),
               high: parseFloat(item.highPrice),
